@@ -8,11 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import ru.vasire.kafnetty.server.netty.ChannelRepository;
-import ru.vasire.kafnetty.server.netty.ChannelWriter;
-import ru.vasire.kafnetty.server.service.message.ClientService;
-import ru.vasire.kafnetty.server.service.message.MessageService;
 import ru.vasire.kafnetty.server.service.message.RequestProcessService;
-import ru.vasire.kafnetty.server.service.message.RoomService;
 
 import static io.netty.handler.codec.http.HttpHeaderNames.HOST;
 

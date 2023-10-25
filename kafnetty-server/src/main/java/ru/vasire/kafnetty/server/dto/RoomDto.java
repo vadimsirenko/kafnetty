@@ -7,7 +7,7 @@ import java.util.UUID;
 
 @Getter
 @Setter
-public class RoomDto extends BaseDto implements RoomMessage {
+public class RoomDto extends BaseDto {
     private UUID id;
     private String name;
     private long messageCount;

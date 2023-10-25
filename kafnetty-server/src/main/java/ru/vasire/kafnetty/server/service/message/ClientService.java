@@ -1,7 +1,5 @@
 package ru.vasire.kafnetty.server.service.message;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.vasire.kafnetty.server.dto.ClientDto;
@@ -23,24 +21,20 @@ public final class ClientService {
     private final ClientRepository clientRepository;
 
     public Client clientLogin(String request, String channelLongId) {
-        try {
-            String json = new String(Base64.getDecoder().decode(request), StandardCharsets.UTF_8);
-            ClientDto clientDto = new ObjectMapper().readValue(json, ClientDto.class);
-            if (!checkToken(clientDto)) {
-                // TODO обработать неверный вход
-                throw new RuntimeException("User is not authorized");
-            }
-            Client client = clientRepository.findByLogin(clientDto.getLogin()).orElse(null);
-            if (client == null) {
-                // TODO обработать неверный вход
-                throw new RuntimeException("User is not authorized");
-            }
-            client.setRoomId(clientDto.getRoomId());
-            savePfofile(client, channelLongId);
-            return client;
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+        String json = new String(Base64.getDecoder().decode(request), StandardCharsets.UTF_8);
+        ClientDto clientDto = ClientDto.encode(json, ClientDto.class);
+        if (!checkToken(clientDto)) {
+            // TODO обработать неверный вход
+            throw new RuntimeException("User is not authorized");
         }
+        Client client = clientRepository.findByLogin(clientDto.getLogin()).orElse(null);
+        if (client == null) {
+            // TODO обработать неверный вход
+            throw new RuntimeException("User is not authorized");
+        }
+        client.setRoomId(clientDto.getRoomId());
+        savePfofile(client, channelLongId);
+        return client;
     }
 
     private void savePfofile(Client client, String channelLongId) {

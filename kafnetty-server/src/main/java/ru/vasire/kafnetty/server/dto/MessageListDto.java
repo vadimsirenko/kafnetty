@@ -9,7 +9,7 @@ import java.util.UUID;
 
 @Getter
 @Setter
-public class MessageListDto extends BaseDto implements ClientMessage{
+public class MessageListDto extends BaseDto {
     @JsonProperty("messages")
     private List<ChatMessageDto> messages;
     private UUID roomId;

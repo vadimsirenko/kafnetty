@@ -7,7 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-public class InfoDto extends BaseDto implements RoomMessage {
+public class InfoDto extends BaseDto {
     private final String messageText;
     public InfoDto(OPERATION_TYPE operationType, String messageText){
         super(MESSAGE_TYPE.INFO, operationType);
@@ -20,5 +20,13 @@ public class InfoDto extends BaseDto implements RoomMessage {
     }
     public InfoDto(String messageText) {
         this(OPERATION_TYPE.NONE, messageText);
+    }
+
+    public static InfoDto createLogonInfo (String nickName){
+        return new InfoDto(OPERATION_TYPE.LOGON, nickName);
+    }
+
+    public static InfoDto createLogoffInfo (String nickName){
+        return new InfoDto(OPERATION_TYPE.LOGOFF, nickName);
     }
 }

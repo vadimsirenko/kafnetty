@@ -7,7 +7,7 @@ import java.util.UUID;
 
 @Getter
 @Setter
-public class ClientDto extends BaseDto implements ClientMessage {
+public class ClientDto extends BaseDto {
     private UUID id;
     private String login;
     private String email;

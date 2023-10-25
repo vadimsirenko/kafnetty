@@ -1,6 +1,10 @@
 package ru.vasire.kafnetty.server.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -24,5 +28,20 @@ public class BaseDto {
         this.messageType = MESSAGE_TYPE.UNKNOWN;
         this.operationType = OPERATION_TYPE.NONE;
         this.ts = System.currentTimeMillis();
+    }
+    public WebSocketFrame toWebSocketFrame(){
+        try {
+            String messageJson = new ObjectMapper().writeValueAsString(this);
+            return new TextWebSocketFrame(messageJson);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public static <T> T encode(String jsonMessage, Class<T> clazz){
+        try {
+            return new ObjectMapper().readValue(jsonMessage, clazz);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

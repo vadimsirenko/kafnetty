@@ -6,8 +6,8 @@
         return new Function(...names, `return \`${this}\`;`)(...vals);
     }
 
-    const logoffTemplate = 'Пользователь ${text} покинул чат';
-    const logonTemplate = 'Пользователь ${text} вошел в чат';
+    var logoffTemplate = 'Пользователь ${text} покинул чат';
+    var logonTemplate = 'Пользователь ${text} вошел в чат';
     let chat = {
         messageToSend: '',
         socket: null,
@@ -156,18 +156,22 @@
         },
         renderedInfoMessage(info){
             infoTemplate = null;
-            if(info.operationType =="LOGON"){
+            if(info.operationType ==="LOGON"){
                 infoTemplate = logonTemplate;
             }
-            if(info.operationType =="LOGOFF"){
+            if(info.operationType ==="LOGOFF"){
                 infoTemplate = logoffTemplate;
             }
-            let templateResponse = Handlebars.compile($("#message-info-template").html());
+            let templateinfoMesssage = Handlebars.compile($("#message-info-template").html());
+            let time_ = this.getFormatedTime(new Date(info.ts));
+            let msgText = infoTemplate.interpolate({text: info.messageText});
+            console.log(msgText);
+            console.log(time_);
             let contextResponse = {
-                messageText: infoTemplate.interpolate({text: info.messageText}),
-                time: this.getFormatedTime(new Date(info.ts))
+                messageText: msgText,
+                time: time_
             };
-            return templateResponse(contextResponse);
+            return templateinfoMesssage(contextResponse);
         },
         processRoomList: function (operationType, rooms) {
             let templateRoomList = Handlebars.compile($("#room-set-item-template").html());
