@@ -1,0 +1,63 @@
+@font-face {
+  font-family: 'kafnetty';
+  src:  url('../fonts/kafnetty.eot?a2z7rq');
+  src:  url('../fonts/kafnetty.eot?a2z7rq#iefix') format('embedded-opentype'),
+    url('../fonts/kafnetty.ttf?a2z7rq') format('truetype'),
+    url('../fonts/kafnetty.woff?a2z7rq') format('woff'),
+    url('../fonts/kafnetty.svg?a2z7rq#kafnetty') format('svg');
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+
+[class^="kn-"]::before, [class*=" kn-"]::before {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'kafnetty' !important;
+  speak: never;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.kn-enter:before {
+  content: "\e909";
+}
+.kn-envelop:before {
+  content: "\e90a";
+}
+.kn-exit:before {
+  content: "\e90b";
+}
+.kn-home:before {
+  content: "\e90c";
+}
+.kn-people-group:before {
+  content: "\e90e";
+}
+.kn-circle:before {
+  content: "\e900";
+}
+.kn-glass:before {
+  content: "\e901";
+}
+.kn-address-card:before {
+  content: "\e902";
+}
+.kn-users:before {
+  content: "\e903";
+}
+.kn-user-tie:before {
+  content: "\e904";
+}
+.kn-user-plus:before {
+  content: "\e905";
+}
+.kn-bubbles:before {
+  content: "\e96d";
+}

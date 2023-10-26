@@ -25,4 +25,9 @@ public class MessageListDto extends BaseDto {
     public MessageListDto() {
         super(MESSAGE_TYPE.MESSAGE_LIST, OPERATION_TYPE.UPDATE);
     }
+    public MessageListDto(UUID roomId, UUID senderId){
+        this();
+        this.roomId = roomId;
+        this.senderId = senderId;
+    }
 }

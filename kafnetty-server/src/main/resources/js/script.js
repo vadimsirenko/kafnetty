@@ -55,11 +55,22 @@
             let roomId = $(event.target).attr('data-id')
             if(roomId==undefined)
                 return;
-            this.$roomSetList.find('.chat-item').css({"font-weight": "normal","color":"white"});
-            $(event.target).css({"font-weight": "bold","color":"#E38968"});
-            this.$chatTitle.text($(event.target).text());
+            //this.$roomSetList.find('.chat-item').css({"font-weight": "normal","color":"white"});
+            //$(event.target).css({"font-weight": "bold","color":"#E38968"});
+            this.updateTitleChat($(event.target).text());
             console.log("roomId=" + roomId);
             this.goToRoom(roomId);
+            this.coloredChatList();
+        },
+        updateTitleChat: function (name){
+            this.$chatTitle.text(name);
+        },
+        coloredChatList:function(){
+            this.$roomSetList.find('.chat-item').css({"font-weight": "normal","color":"white"});
+            if(this.roomId===null)
+                return;
+            this.$roomSetList.find('.chat-item[data-id='+ this.roomId+']').css({"font-weight": "bold","color":"#E38968"});
+            this.updateTitleChat(this.$roomSetList.find('.chat-item[data-id='+ this.roomId+']').text());
         },
         scrollToBottom: function () {
             this.$chatHistory.scrollTop(this.$chatHistory[0].scrollHeight);
@@ -82,12 +93,12 @@
                 window.WebSocket = window.MozWebSocket;
             }
             if (window.WebSocket) {
-
+                let roomId = "2bd09cbf-ef16-469f-82ab-f51ae9913aa0";
                 let config = {
                     "messageType": "CLIENT",
                     "operationType": "LOGON",
                     "login": userLogin,
-                    "roomId": "057a7522-df71-4406-9559-844e7ce7cf4c",
+                    "roomId": roomId,
                     "token": "dfgfdsgfdsgfdsgfdsgfdsg"
                 }
                 let configJSON = JSON.stringify(config);
@@ -98,6 +109,7 @@
                 this.socket.addEventListener('message', this.receiveMessage.bind(this));
                 this.socket.addEventListener('open', this.socketOpen.bind(this));
                 this.socket.addEventListener('close', this.socketClose.bind(this));
+                this.roomId = roomId;
             }
         },
         socketClose: function (event) {
@@ -180,6 +192,7 @@
             this.$roomSetList.empty();
             this.$roomSetList.append( templateRoomList({objects:rooms}));
             searchRoomFilter.init();
+            this.coloredChatList();
         },
         processMessageList: function (operationType, messages) {
             this.$chatHistoryList.empty();
@@ -249,7 +262,7 @@
 
     chat.init();
 
-    var searchRoomFilter = {
+    searchRoomFilter = {
         options: {valueNames: ['name']},
         init: function () {
             var chatList = new List('chat-list', this.options);
@@ -260,6 +273,7 @@
                     $(list.list).append(noItems);
                 } else {
                     noItems.detach();
+                    chat.coloredChatList();
                 }
             });
         }

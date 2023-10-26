@@ -33,7 +33,7 @@ body {
     width: 90%;
     font-size: 14px;
 }
-.room-set .fa-search {
+.room-set .kn-glass {
     position: relative;
     left: -25px;
 }
@@ -60,9 +60,11 @@ body {
     float: left;
 }
 .chat .chat-header .chat-about {
-    float: left;
-    padding-left: 10px;
+    /*float: left;*/
+    padding-left: 20px;
     margin-top: 6px;
+
+    display: inline-block;
 }
 .chat .chat-header .chat-with {
     font-weight: bold;
@@ -70,12 +72,6 @@ body {
 }
 .chat .chat-header .chat-num-messages {
     color: #92959E;
-}
-.chat .chat-header .fa-star {
-    float: right;
-    color: #D8DADF;
-    font-size: 20px;
-    margin-top: 12px;
 }
 .chat .chat-history {
     padding: 30px 30px 20px;
@@ -135,11 +131,6 @@ body {
     border-radius: 5px;
     resize: none;
 }
-.chat .chat-message .fa-file-o, .chat .chat-message .fa-file-image-o {
-    font-size: 16px;
-    color: gray;
-    cursor: pointer;
-}
 .chat .chat-message button {
     float: right;
     color: #94C2ED;
@@ -163,7 +154,7 @@ body {
     color: #86BB71;
 }
 .chats {
-    color: #94C2ED;
+    /*color: #94C2ED;*/
     margin-right: 10px;
 }
 .offline {

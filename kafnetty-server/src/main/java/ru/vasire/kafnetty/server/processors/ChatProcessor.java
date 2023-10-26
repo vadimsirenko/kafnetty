@@ -85,6 +85,7 @@ public final class ChatProcessor {
             System.out.println(channel + " tourist");
         } else {
             channel.writeAndFlush(roomProcessor.getRoomList(userProfileDto.getId()).toWebSocketFrame());
+            channel.writeAndFlush(chatMessageProcessor.getMessageListByRoomId(userProfileDto.getRoomId(), userProfileDto.getId()).toWebSocketFrame());
             channel.writeAndFlush(UserProfileDtoMapper.INSTANCE.UserProfileDtoToClientDto(userProfileDto).toWebSocketFrame());
         }
     }

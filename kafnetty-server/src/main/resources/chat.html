@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <title>Netty Kafka Chat</title>
   <meta name="description" content="Tuts+ Chat Application" />
-  <link href="css/font-awesome.min.css" rel="stylesheet" />
+  <link href="css/icons-kafnetty.css" rel="stylesheet" />
   <link href="css/reset.min.css" rel="stylesheet"/>
   <link href="css/style.css" rel="stylesheet"/>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -14,21 +14,32 @@
   <div class="room-set" id="chat-list">
     <div class="search">
       <input type="text" placeholder="search" />
-      <i class="fa fa-search"></i>
+      <i class="kn kn-glass"></i>
     </div>
     <ul class="list">
       <li class="clearfix"></li>
     </ul>
   </div>
   <div class="chat">
-    <div class="chat-header clearfix">
+    <!--<div class="chat-header clearfix">
       <img src="img/avatar-small.jpg" alt="avatar">
 
       <div class="chat-about">
         <div class="chat-with"></div>
         <div class="chat-num-messages">already 1 902 messages</div>
       </div>
-    </div> <!-- end chat-header -->
+    </div> -->
+    <!-- end chat-header -->
+    <div class="chat-header clearfix">
+      <!--<img src="img/avatar-small.jpg" alt="avatar">-->
+      <div class="kn-people-group" style="font-size: 35px;display: inline-block;"></div>
+      <div class="chat-about" style="display: inline-block;">
+        <div class="chat-with"></div>
+        <div class="chat-num-messages"></div>
+      </div>
+    </div>
+
+
 
     <div class="chat-history">
       <ul>
@@ -48,7 +59,7 @@
   {{#each objects}}
   <li class="clearfix">
     <div class="name chat-item" data-id="{{id}}">
-      <i class="fa fa-circle chats"></i>
+      <i class="kn kn-circle chats"></i>
       {{name}}
     </div>
   </li>
@@ -59,7 +70,7 @@
   <li class="clearfix">
     <div class="message-data align-right">
       <span class="message-data-time" >{{time}}</span> &nbsp; &nbsp;
-      <span class="message-data-name" >{{login}}</span> <i class="fa fa-circle me"></i>
+      <span class="message-data-name" >{{login}}</span> <i class="kn kn-circle me"></i>
     </div>
     <div class="message other-message float-right">
       {{messageText}}
@@ -70,7 +81,7 @@
 <script id="message-response-template" type="text/x-handlebars-template">
   <li>
     <div class="message-data">
-      <span class="message-data-name"><i class="fa fa-circle online"></i> {{login}}</span>
+      <span class="message-data-name"><i class="kn kn-circle online"></i> {{login}}</span>
       <span class="message-data-time">{{time}}</span>
     </div>
     <div class="message my-message">
