@@ -1,47 +1,27 @@
-package ru.vasire.kafnetty.server.service.message;
+package ru.vasire.kafnetty.server.processors;
 
+import io.netty.channel.Channel;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import ru.vasire.kafnetty.server.dto.BaseDto;
 import ru.vasire.kafnetty.server.dto.ClientDto;
 import ru.vasire.kafnetty.server.dto.UserProfileDto;
 import ru.vasire.kafnetty.server.entity.Client;
+import ru.vasire.kafnetty.server.mapper.ClientMapper;
 import ru.vasire.kafnetty.server.mapper.UserProfileDtoMapper;
 import ru.vasire.kafnetty.server.repository.ClientRepository;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Service
+@Component
 @RequiredArgsConstructor
-public final class ClientService {
+public final class ClientPoocessor {
     private static final Map<String, UserProfileDto> USER_PROFILES = new ConcurrentHashMap<>();
     private final ClientRepository clientRepository;
 
-    public Client clientLogin(String request, String channelLongId) {
-        String json = new String(Base64.getDecoder().decode(request), StandardCharsets.UTF_8);
-        ClientDto clientDto = ClientDto.encode(json, ClientDto.class);
-        if (!checkToken(clientDto)) {
-            // TODO обработать неверный вход
-            throw new RuntimeException("User is not authorized");
-        }
-        Client client = clientRepository.findByLogin(clientDto.getLogin()).orElse(null);
-        if (client == null) {
-            // TODO обработать неверный вход
-            throw new RuntimeException("User is not authorized");
-        }
-        client.setRoomId(clientDto.getRoomId());
-        savePfofile(client, channelLongId);
-        return client;
-    }
-
-    private void savePfofile(Client client, String channelLongId) {
-        if (channelLongId != null && client != null) {
-            USER_PROFILES.put(channelLongId, UserProfileDtoMapper.INSTANCE.ClientToUserProfileDto(client));
-        }
-    }
     public UserProfileDto getProfile(String channelLongId) {
         if (channelLongId != null) {
             return USER_PROFILES.get(channelLongId);
@@ -68,6 +48,25 @@ public final class ClientService {
         if(USER_PROFILES.containsKey(channelLongId)){
             USER_PROFILES.remove(channelLongId);
         }
+    }
+
+    public ClientDto processMessage(BaseDto message, Channel channel) {
+        ClientDto clientDto = (ClientDto)message;
+        if (clientDto.getRoomId() == null) {
+            throw new RuntimeException("User is not authorized");
+        }
+        if (!checkToken((ClientDto) clientDto)) {
+            // TODO обработать неверный вход
+            throw new RuntimeException("User is not authorized");
+        }
+        Client client = clientRepository.findByLogin(clientDto.getLogin()).orElse(null);
+        if (client == null) {
+            // TODO обработать неверный вход
+            throw new RuntimeException("User is not authorized");
+        }
+        client.setRoomId(clientDto.getRoomId());
+        USER_PROFILES.put(channel.id().asLongText(), UserProfileDtoMapper.INSTANCE.ClientToUserProfileDto(client));
+        return ClientMapper.INSTANCE.ClientToClientDto(client);
     }
 }
 

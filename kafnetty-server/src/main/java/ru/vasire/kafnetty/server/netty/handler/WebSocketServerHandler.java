@@ -7,8 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-import ru.vasire.kafnetty.server.netty.ChannelRepository;
-import ru.vasire.kafnetty.server.service.message.RequestProcessService;
+import ru.vasire.kafnetty.server.processors.HttpRequestProcessor;
 
 import static io.netty.handler.codec.http.HttpHeaderNames.HOST;
 
@@ -18,11 +17,8 @@ import static io.netty.handler.codec.http.HttpHeaderNames.HOST;
 @Qualifier("webSocketServerHandler")
 public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> {
     private static final String WEBSOCKET_PATH = "/websocket";
-
-    @Autowired
-    private ChannelRepository channelRepository;
     private WebSocketServerHandshaker handshaker;
-    private final RequestProcessService requestProcessService;
+    private final HttpRequestProcessor httpRequestProcessor;
 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, Object msg) {
@@ -40,7 +36,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
     }
 
     private void handleHttpRequest(ChannelHandlerContext ctx, HttpRequest request) {
-        if (requestProcessService.processHttpRequest(ctx, request)) {
+        if (httpRequestProcessor.processHttpRequest(ctx, request)) {
             // Handshake
             WebSocketServerHandshakerFactory wsFactory = new WebSocketServerHandshakerFactory(getWebSocketLocation(request), null, true);
             handshaker = wsFactory.newHandshaker(request);
@@ -50,7 +46,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 ChannelFuture channelFuture = handshaker.handshake(ctx.channel(), request);
                 // After the handshake is successful, the business logic
                 if (channelFuture.isSuccess()) {
-                    requestProcessService.InitChannel(ctx.channel());
+                    httpRequestProcessor.InitChannel(ctx.channel());
                 }
             }
         }
@@ -65,7 +61,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
         else if (!(frame instanceof TextWebSocketFrame)) // text data
             throw new UnsupportedOperationException(String.format("%s frame types not supported", frame.getClass().getName()));
         else
-            requestProcessService.processWebSocketRequest(ctx.channel(), frame);
+            httpRequestProcessor.processWebSocketRequest(ctx.channel(), frame);
     }
 
     @Override
@@ -82,7 +78,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 
     @Override
     public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
-        channelRepository.remove(ctx.channel());
+        httpRequestProcessor.removeChannel(ctx.channel());
     }
 
     private static String getWebSocketLocation(HttpRequest req) {

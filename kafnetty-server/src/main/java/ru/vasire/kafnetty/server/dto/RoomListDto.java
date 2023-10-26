@@ -3,6 +3,8 @@ package ru.vasire.kafnetty.server.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
+import ru.vasire.kafnetty.server.types.MESSAGE_TYPE;
+import ru.vasire.kafnetty.server.types.OPERATION_TYPE;
 
 import java.util.List;
 @Getter

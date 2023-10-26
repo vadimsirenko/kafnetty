@@ -84,6 +84,8 @@
             if (window.WebSocket) {
 
                 let config = {
+                    "messageType": "CLIENT",
+                    "operationType": "LOGON",
                     "login": userLogin,
                     "roomId": "057a7522-df71-4406-9559-844e7ce7cf4c",
                     "token": "dfgfdsgfdsgfdsgfdsgfdsg"

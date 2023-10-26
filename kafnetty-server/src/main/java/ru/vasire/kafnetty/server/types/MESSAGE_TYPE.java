@@ -1,4 +1,4 @@
-package ru.vasire.kafnetty.server.dto;
+package ru.vasire.kafnetty.server.types;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -17,6 +17,8 @@ public enum MESSAGE_TYPE {
     INFO,
     @JsonProperty("ERROR")
     ERROR,
+    @JsonProperty("USER_PROFILE")
+    USER_PROFILE,
     @JsonProperty("UNKNOWN")
     UNKNOWN
 }
