@@ -1,13 +1,4 @@
 (function () {
-
-    String.prototype.interpolate = function(params) {
-        const names = Object.keys(params);
-        const vals = Object.values(params);
-        return new Function(...names, `return \`${this}\`;`)(...vals);
-    }
-
-    var logoffTemplate = 'Пользователь ${text} покинул чат';
-    var logonTemplate = 'Пользователь ${text} вошел в чат';
     let chat = {
         messageToSend: '',
         socket: null,
@@ -31,8 +22,7 @@
             this.$roomSet = $('.room-set');
             this.$button = $('button');
             this.$textarea = $('#message-to-send');
-            this.$chatTitle = $('.chat-with');
-            this.$chatCountTitle = $('.chat-num-messages');
+            this.$chatAbout = $('.chat-about');
             this.$chatHistoryList = this.$chatHistory.find('ul');
             this.$roomSetList = this.$roomSet.find('ul');
         },
@@ -55,15 +45,27 @@
             let roomId = $(event.target).attr('data-id')
             if(roomId==undefined)
                 return;
-            //this.$roomSetList.find('.chat-item').css({"font-weight": "normal","color":"white"});
-            //$(event.target).css({"font-weight": "bold","color":"#E38968"});
-            this.updateTitleChat($(event.target).text());
+            this.updateTitleChat();
             console.log("roomId=" + roomId);
             this.goToRoom(roomId);
             this.coloredChatList();
         },
-        updateTitleChat: function (name){
-            this.$chatTitle.text(name);
+        updateTitleChat: function (){
+            if(this.roomId===null)
+                return;
+            let chatName = this.$roomSetList.find('.chat-item[data-id='+ this.roomId+']').text();
+            if (chatName === null)
+                return;
+            let templateResponse = Handlebars.compile($("#chat-about-template").html());
+            let countMessage = 'В чате пока нет сообщений';
+            if(this.messagesLength != null && this.messagesLength > 0) {
+                countMessage = "В чате уже " + this.messagesLength + " сообщений";
+            }
+            let contextResponse = {
+                chatName: chatName,
+                chatStatistic: countMessage
+            };
+            this.$chatAbout.html(templateResponse(contextResponse));
         },
         coloredChatList:function(){
             this.$roomSetList.find('.chat-item').css({"font-weight": "normal","color":"white"});
@@ -75,7 +77,7 @@
         scrollToBottom: function () {
             this.$chatHistory.scrollTop(this.$chatHistory[0].scrollHeight);
         },
-        getFormatedTime: function (date) {
+        getFormattedTime: function (date) {
             return date.toLocaleString();
         },
         loginUser: function () {
@@ -105,18 +107,21 @@
                 // Encode the String
                 let encodedString = Base64.encode(configJSON);
 
-                this.socket = new WebSocket("ws://localhost:8181/websocket/?request=" + encodedString);
+                try {
+                    this.socket = new WebSocket("ws://localhost:8181/websocket/?request=" + encodedString);
+                } catch (e) {
+                    console.log("server unnavigable");
+                    return;
+                }
                 this.socket.addEventListener('message', this.receiveMessage.bind(this));
                 this.socket.addEventListener('open', this.socketOpen.bind(this));
                 this.socket.addEventListener('close', this.socketClose.bind(this));
-                this.roomId = roomId;
             }
         },
         socketClose: function (event) {
             console.log("websocket closed");
         },
         socketOpen: function (event) {
-            //document.getElementById("welcome").innerHTML = 'Добро пожаловать, <b>'+ login + '</b>. Вы находитсь в чате: <b>Главный чат</b>';
             console.log("websocket opened");
         },
         receiveMessage: function (event) {
@@ -132,7 +137,7 @@
             }
             if (data.messageType === "CLIENT") {
                 console.log(data);
-                this.processClientProfile(data.id, data.nickName);
+                this.processClientProfile(data);
             }
             if (data.messageType === "INFO") {
                 console.log(data);
@@ -142,13 +147,18 @@
                 this.processMessageList(data.operationType, data.messages);
             }
         },
-        processClientProfile: function (id, nickName) {
-            this.senderId = id;
-            this.nickName = nickName;
+        processClientProfile: function (data) {
+            this.senderId = data.id;
+            this.nickName = data.nickName;
+            if(data.roomId != null) {
+                this.roomId = data.roomId;
+                this.coloredChatList();
+                this.goToRoom(data.roomId, true);
+            }
         },
         processMessage: function (message) {
             this.messagesLength = this.messagesLength + 1;
-            this.updateRoomStatistic();
+            this.updateTitleChat();
             this.$chatHistoryList.append(this.renderedMessage(message));
             this.scrollToBottom();
         },
@@ -164,25 +174,22 @@
             let contextResponse = {
                 login: message.sender,
                 messageText: message.messageText,
-                time: this.getFormatedTime(new Date(message.ts))
+                time: this.getFormattedTime(new Date(message.ts))
             };
             return templateResponse(contextResponse);
         },
         renderedInfoMessage(info){
-            infoTemplate = null;
+            let templateinfoMesssage = null;
             if(info.operationType ==="LOGON"){
-                infoTemplate = logonTemplate;
+                templateinfoMesssage = Handlebars.compile($("#message-logon-info-template").html());
+            } else if(info.operationType ==="LOGOFF"){
+                templateinfoMesssage = Handlebars.compile($("#message-logoff-info-template").html());
+            }else{
+                templateinfoMesssage = Handlebars.compile($("#message-info-template").html());
             }
-            if(info.operationType ==="LOGOFF"){
-                infoTemplate = logoffTemplate;
-            }
-            let templateinfoMesssage = Handlebars.compile($("#message-info-template").html());
-            let time_ = this.getFormatedTime(new Date(info.ts));
-            let msgText = infoTemplate.interpolate({text: info.messageText});
-            console.log(msgText);
-            console.log(time_);
+            let time_ = this.getFormattedTime(new Date(info.ts));
             let contextResponse = {
-                messageText: msgText,
+                messageText: info.messageText,
                 time: time_
             };
             return templateinfoMesssage(contextResponse);
@@ -197,15 +204,12 @@
         processMessageList: function (operationType, messages) {
             this.$chatHistoryList.empty();
             this.messagesLength = messages.length;
-            this.updateRoomStatistic();
+            this.updateTitleChat();
             for(let i=0;i<messages.length;i++)
             {
                 this.$chatHistoryList.append(this.renderedMessage(messages[i]));
             }
             this.$chatHistory.scrollTop(this.$chatHistory[0].scrollHeight);
-        },
-        updateRoomStatistic: function () {
-            this.$chatCountTitle.text("уже " + this.messagesLength + " сообщений");
         },
         sendMessage: function () {
             this.scrollToBottom();
@@ -235,9 +239,9 @@
                 }
             }
         },
-        goToRoom: function (roomId) {
+        goToRoom: function (roomId, force = false) {
             this.scrollToBottom();
-            if (roomId != null && this.roomId !== roomId) {
+            if (roomId != null && (this.roomId !== roomId) || force===true) {
                 this.roomId = roomId;
                 if (!window.WebSocket) {
                     return;
@@ -278,6 +282,5 @@
             });
         }
     };
-    //searchRoomFilter.init();
 
 })();

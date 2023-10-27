@@ -1,109 +1,123 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>Netty Kafka Chat</title>
-  <meta name="description" content="Tuts+ Chat Application" />
-  <link href="css/icons-kafnetty.css" rel="stylesheet" />
-  <link href="css/reset.min.css" rel="stylesheet"/>
-  <link href="css/style.css" rel="stylesheet"/>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8"/>
+    <title>Netty Kafka Chat</title>
+    <meta name="description" content="Tuts+ Chat Application"/>
+    <link href="css/icons-kafnetty.min.css" rel="stylesheet"/>
+    <link href="css/reset.min.css" rel="stylesheet"/>
+    <link href="css/style.min.css" rel="stylesheet"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 </head>
 <body>
 <div class="container clearfix">
-  <div class="room-set" id="chat-list">
-    <div class="search">
-      <input type="text" placeholder="search" />
-      <i class="kn kn-glass"></i>
+    <div class="room-set" id="chat-list">
+        <div class="search">
+            <input type="text" placeholder="search"/>
+            <i class="kn kn-glass"></i>
+        </div>
+        <ul class="list">
+            <li class="clearfix"></li>
+        </ul>
     </div>
-    <ul class="list">
-      <li class="clearfix"></li>
-    </ul>
-  </div>
-  <div class="chat">
-    <!--<div class="chat-header clearfix">
-      <img src="img/avatar-small.jpg" alt="avatar">
+    <div class="chat">
 
-      <div class="chat-about">
-        <div class="chat-with"></div>
-        <div class="chat-num-messages">already 1 902 messages</div>
-      </div>
-    </div> -->
-    <!-- end chat-header -->
-    <div class="chat-header clearfix">
-      <!--<img src="img/avatar-small.jpg" alt="avatar">-->
-      <div class="kn-people-group" style="font-size: 35px;display: inline-block;"></div>
-      <div class="chat-about" style="display: inline-block;">
-        <div class="chat-with"></div>
-        <div class="chat-num-messages"></div>
-      </div>
+        <div class="chat-header clearfix">
+            <div class="kn-people-group" style="font-size: 35px;display: inline-block;"></div>
+            <div class="chat-about" style="display: inline-block;">
+
+            <!--
+                <div class="chat-with"></div>
+                <div class="chat-num-messages"></div>
+            -->
+            </div>
+        </div>
+
+        <div class="chat-history">
+            <ul>
+                <li></li>
+            </ul>
+        </div>
+
+        <div class="chat-message clearfix">
+            <textarea name="message-to-send" id="message-to-send" placeholder="Type your message" rows="3"></textarea>
+            <button><i class="kn-envelop"></i>Отправить</button>
+        </div>
     </div>
-
-
-
-    <div class="chat-history">
-      <ul>
-        <li></li>
-      </ul>
-
-    </div> <!-- end chat-history -->
-
-    <div class="chat-message clearfix">
-      <textarea name="message-to-send" id="message-to-send" placeholder="Type your message" rows="3"></textarea>
-      <button>Отправить</button>
-    </div> <!-- end chat-message -->
-  </div> <!-- end chat -->
 </div>
 
 <script id="room-set-item-template" type="text/x-handlebars-template">
-  {{#each objects}}
-  <li class="clearfix">
-    <div class="name chat-item" data-id="{{id}}">
-      <i class="kn kn-circle chats"></i>
-      {{name}}
-    </div>
-  </li>
-  {{/each}}
-</script>
-
-<script id="message-template" type="text/x-handlebars-template">
-  <li class="clearfix">
-    <div class="message-data align-right">
-      <span class="message-data-time" >{{time}}</span> &nbsp; &nbsp;
-      <span class="message-data-name" >{{login}}</span> <i class="kn kn-circle me"></i>
-    </div>
-    <div class="message other-message float-right">
-      {{messageText}}
-    </div>
-  </li>
+    {{#each objects}}
+    <li class="clearfix">
+        <div class="name chat-item" data-id="{{id}}">
+            <i class="kn kn-circle chats"></i>
+            {{name}}
+        </div>
+    </li>
+    {{/each}}
 </script>
 
 <script id="message-response-template" type="text/x-handlebars-template">
-  <li>
-    <div class="message-data">
-      <span class="message-data-name"><i class="kn kn-circle online"></i> {{login}}</span>
-      <span class="message-data-time">{{time}}</span>
-    </div>
-    <div class="message my-message">
-      {{messageText}}
-    </div>
-  </li>
+    <li class="clearfix">
+        <div class="message-data align-right">
+            <span class="message-data-time">{{time}}</span> &nbsp; &nbsp;
+            <span class="message-data-name">{{login}}</span> <i class="kn kn-circle me"></i>
+        </div>
+        <div class="message other-message float-right">
+            {{messageText}}
+        </div>
+    </li>
+</script>
+
+<script id="message-template" type="text/x-handlebars-template">
+    <li>
+        <div class="message-data">
+            <span class="message-data-name"><i class="kn kn-circle online"></i> {{login}}</span>
+            <span class="message-data-time">{{time}}</span>
+        </div>
+        <div class="message my-message">
+            {{messageText}}
+        </div>
+    </li>
 </script>
 
 <script id="message-info-template" type="text/x-handlebars-template">
-  <li>
-    <div class="message-data">
-      <span class="message-data-name">{{messageText}}</span>
-      <span class="message-data-time">{{time}}</span>
-    </div>
-  </li>
+    <li>
+        <div class="message-data info">
+            <span class="message-data-name">{{messageText}}</span>
+            <span class="message-data-time">{{time}}</span>
+        </div>
+    </li>
 </script>
 
-<script src="js/base64.js"></script>
+<script id="message-logon-info-template" type="text/x-handlebars-template">
+    <li>
+        <div class="message-data info">
+            <span class="message-data-name">Пользователь <span class="login">{{messageText}}</span>  вошел в чат</span>
+            <span class="message-data-time">{{time}}</span>
+        </div>
+    </li>
+</script>
+
+<script id="message-logoff-info-template" type="text/x-handlebars-template">
+    <li>
+        <div class="message-data info">
+            <span class="message-data-name">Пользователь <span class="login">{{messageText}}</span> покинул чат</span>
+            <span class="message-data-time">{{time}}</span>
+        </div>
+    </li>
+</script>
+
+<script id="chat-about-template" type="text/x-handlebars-template">
+        <div class="chat-with">{{chatName}}</div>
+        <div class="chat-num-messages">{{chatStatistic}}</div>
+</script>
+
+<script src="js/base64.min.js"></script>
 <script src="js/jquery-3.7.1.min.js"></script>
 <script src="js/handlebars.min.js"></script>
 <script src="js/list.min.js"></script>
-<script src="js/script.js"></script>
+<script src="js/script.min.js"></script>
 
 </body>
 </html>

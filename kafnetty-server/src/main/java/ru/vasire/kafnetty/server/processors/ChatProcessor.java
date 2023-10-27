@@ -27,7 +27,7 @@ public final class ChatProcessor {
         }
         UserProfileDto userProfileDto = clientPoocessor.getProfile(channel.id().asLongText());
         UUID roomIdOld = (userProfileDto != null)? userProfileDto.getRoomId(): null;
-        if(roomIdOld != null && roomIdOld != roomId && CHANNEL_GROUP_MAP.get(roomIdOld).contains(channel))
+        if(roomIdOld != null && !roomIdOld.equals(roomId) && CHANNEL_GROUP_MAP.get(roomIdOld).contains(channel))
         {
             CHANNEL_GROUP_MAP.get(roomIdOld).remove(channel);
             CHANNEL_GROUP_MAP.get(roomIdOld).writeAndFlush(InfoDto.createLogoffInfo(userProfileDto.getNickName()).toWebSocketFrame());
@@ -85,8 +85,8 @@ public final class ChatProcessor {
             System.out.println(channel + " tourist");
         } else {
             channel.writeAndFlush(roomProcessor.getRoomList(userProfileDto.getId()).toWebSocketFrame());
-            channel.writeAndFlush(chatMessageProcessor.getMessageListByRoomId(userProfileDto.getRoomId(), userProfileDto.getId()).toWebSocketFrame());
             channel.writeAndFlush(UserProfileDtoMapper.INSTANCE.UserProfileDtoToClientDto(userProfileDto).toWebSocketFrame());
+            //channel.writeAndFlush(chatMessageProcessor.getMessageListByRoomId(userProfileDto.getRoomId(), userProfileDto.getId()).toWebSocketFrame());
         }
     }
 }
