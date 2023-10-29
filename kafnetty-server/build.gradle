@@ -16,7 +16,7 @@ dependencies {
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.15.3'
     // https://mvnrepository.com/artifact/org.apache.tika/tika-core
     implementation 'org.apache.tika:tika-core:2.9.1'
-
+    implementation 'org.slf4j:slf4j-api:2.0.9'
 
     implementation 'org.slf4j:slf4j-api:2.0.9'
 

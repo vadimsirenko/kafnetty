@@ -71,7 +71,6 @@ public class HttpRequestProcessorImpl implements HttpRequestProcessor {
                 handleResource(ctx, request, request.uri().substring(1));
                 return false;
             }
-
             if (!request.uri().startsWith(webSocketPath)) {
                 handleResource(ctx, request, request.uri().substring(1));
                 return false;
