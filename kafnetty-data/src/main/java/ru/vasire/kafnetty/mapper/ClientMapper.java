@@ -1,12 +1,13 @@
-package ru.vasire.kafnetty.server.mapper;
+package ru.vasire.kafnetty.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingConstants;
 import org.mapstruct.factory.Mappers;
-import ru.vasire.kafnetty.server.entity.Client;
-import ru.vasire.kafnetty.server.dto.ClientDto;
+import ru.vasire.kafnetty.dto.ClientDto;
+import ru.vasire.kafnetty.entity.Client;
 
-@Mapper
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface ClientMapper {
     ClientMapper INSTANCE = Mappers.getMapper( ClientMapper.class );
     @Mapping(ignore = true, target = "messageType")

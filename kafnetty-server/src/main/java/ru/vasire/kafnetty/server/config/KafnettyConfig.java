@@ -12,15 +12,13 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-@Configuration
-@EnableJpaRepositories(basePackages = "ru.vasire.kafnetty.server.repository")
+@Configuration()
 public class KafnettyConfig {
     @Value("${server.port}")
     private int tcpPort;
@@ -78,4 +76,6 @@ public class KafnettyConfig {
     public InetSocketAddress tcpPort() {
         return new InetSocketAddress(tcpPort);
     }
+
+
 }

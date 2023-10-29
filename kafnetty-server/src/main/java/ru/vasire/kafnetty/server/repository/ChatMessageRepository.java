@@ -1,7 +1,8 @@
 package ru.vasire.kafnetty.server.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import ru.vasire.kafnetty.server.entity.ChatMessage;
+import ru.vasire.kafnetty.entity.ChatMessage;
+
 import java.util.List;
 import java.util.UUID;
 

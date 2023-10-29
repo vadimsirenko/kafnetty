@@ -2,14 +2,14 @@ package ru.vasire.kafnetty.server.processors;
 
 import io.netty.channel.Channel;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
-import ru.vasire.kafnetty.server.dto.BaseDto;
-import ru.vasire.kafnetty.server.dto.ClientDto;
-import ru.vasire.kafnetty.server.dto.UserProfileDto;
-import ru.vasire.kafnetty.server.entity.Client;
-import ru.vasire.kafnetty.server.mapper.ClientMapper;
-import ru.vasire.kafnetty.server.mapper.UserProfileDtoMapper;
+import ru.vasire.kafnetty.dto.BaseDto;
+import ru.vasire.kafnetty.dto.ClientDto;
+import ru.vasire.kafnetty.dto.UserProfileDto;
+import ru.vasire.kafnetty.entity.Client;
+import ru.vasire.kafnetty.mapper.ClientMapper;
+import ru.vasire.kafnetty.mapper.UserProfileDtoMapper;
 import ru.vasire.kafnetty.server.repository.ClientRepository;
 
 import java.util.Map;
@@ -18,7 +18,14 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 @RequiredArgsConstructor
-public final class ClientPoocessor {
+public class ClientProcessor {
+
+    @Autowired
+    private UserProfileDtoMapper userProfileDtoMapper;
+
+    @Autowired
+    private ClientMapper clientMapper;
+
     private static final Map<String, UserProfileDto> USER_PROFILES = new ConcurrentHashMap<>();
     private final ClientRepository clientRepository;
 
@@ -65,8 +72,8 @@ public final class ClientPoocessor {
             throw new RuntimeException("User is not authorized");
         }
         client.setRoomId(clientDto.getRoomId());
-        USER_PROFILES.put(channel.id().asLongText(), UserProfileDtoMapper.INSTANCE.ClientToUserProfileDto(client));
-        return ClientMapper.INSTANCE.ClientToClientDto(client);
+        USER_PROFILES.put(channel.id().asLongText(), userProfileDtoMapper.ClientToUserProfileDto(client));
+        return clientMapper.ClientToClientDto(client);
     }
 }
 

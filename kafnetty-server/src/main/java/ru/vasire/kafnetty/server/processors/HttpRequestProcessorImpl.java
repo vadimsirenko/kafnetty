@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.tika.Tika;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import ru.vasire.kafnetty.server.dto.ErrorDto;
+import ru.vasire.kafnetty.dto.ErrorDto;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,7 +43,7 @@ public class HttpRequestProcessorImpl implements HttpRequestProcessor {
     public void processWebSocketRequest(Channel channel, WebSocketFrame frame) {
         try {
             if (!chatProcessor.existsUserProfile(channel)) {
-                channel.writeAndFlush(ErrorDto.createCommonError("You can't chat without logging in").toWebSocketFrame());
+                channel.writeAndFlush(new TextWebSocketFrame(ErrorDto.createCommonError("You can't chat without logging in").toJson()));
             } else {
                 chatProcessor.processMessage(((TextWebSocketFrame) frame).text(), channel);
             }

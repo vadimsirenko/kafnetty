@@ -1,4 +1,4 @@
-package ru.vasire.kafnetty.server.types;
+package ru.vasire.kafnetty.types;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

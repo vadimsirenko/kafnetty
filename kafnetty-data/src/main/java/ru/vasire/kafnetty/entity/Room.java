@@ -1,9 +1,8 @@
-package ru.vasire.kafnetty.server.entity;
+package ru.vasire.kafnetty.entity;
 
-import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-
+import jakarta.persistence.*;
 import java.util.UUID;
 
 @Getter

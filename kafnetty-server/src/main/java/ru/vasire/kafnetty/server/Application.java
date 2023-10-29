@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import ru.vasire.kafnetty.server.netty.TCPServer;
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = "ru.vasire.kafnetty")
 public class Application {
 
     public static void main(String[] args) throws Exception {

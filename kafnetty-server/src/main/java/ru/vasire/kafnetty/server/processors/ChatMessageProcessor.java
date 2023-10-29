@@ -2,13 +2,13 @@ package ru.vasire.kafnetty.server.processors;
 
 import io.netty.channel.Channel;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
-import ru.vasire.kafnetty.server.dto.BaseDto;
-import ru.vasire.kafnetty.server.dto.ChatMessageDto;
-import ru.vasire.kafnetty.server.dto.MessageListDto;
-import ru.vasire.kafnetty.server.entity.ChatMessage;
-import ru.vasire.kafnetty.server.mapper.ChatMessageMapper;
+import ru.vasire.kafnetty.dto.BaseDto;
+import ru.vasire.kafnetty.dto.ChatMessageDto;
+import ru.vasire.kafnetty.dto.MessageListDto;
+import ru.vasire.kafnetty.entity.ChatMessage;
+import ru.vasire.kafnetty.mapper.ChatMessageMapper;
 import ru.vasire.kafnetty.server.repository.ChatMessageRepository;
 
 import java.util.UUID;
@@ -16,13 +16,16 @@ import java.util.UUID;
 @Component
 @RequiredArgsConstructor
 public final class ChatMessageProcessor {
+    @Autowired
+    private ChatMessageMapper chatMessageMapper;
+
     private final ChatMessageRepository chatMessageRepository;
     public ChatMessageDto processMessage(BaseDto message, Channel channel) {
-        ChatMessage chatMessage = ChatMessageMapper.INSTANCE.ChatMessageDtoToChatMessage((ChatMessageDto)message);
+        ChatMessage chatMessage = chatMessageMapper.ChatMessageDtoToChatMessage((ChatMessageDto)message);
         if (!chatMessageRepository.existsById(chatMessage.getId())) {
             chatMessageRepository.saveAndFlush(chatMessage);
         }
-        return ChatMessageMapper.INSTANCE.ChatMessageToChatMessageDto(chatMessage);
+        return chatMessageMapper.ChatMessageToChatMessageDto(chatMessage);
     }
     public MessageListDto processMessageList(BaseDto message, Channel channel) {
         MessageListDto messageListDto = (MessageListDto)message;
@@ -35,7 +38,7 @@ public final class ChatMessageProcessor {
             // TODO обработать неверный вход
             throw new RuntimeException("Illegal value roomId");
         }
-        messageListDto.setMessages(chatMessageRepository.findByRoomId(roomId).stream().map(ChatMessageMapper.INSTANCE::ChatMessageToChatMessageDto).toList());
+        messageListDto.setMessages(chatMessageRepository.findByRoomId(roomId).stream().map(chatMessageMapper::ChatMessageToChatMessageDto).toList());
         return messageListDto;
     }
 }

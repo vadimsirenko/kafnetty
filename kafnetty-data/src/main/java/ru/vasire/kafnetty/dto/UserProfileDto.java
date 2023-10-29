@@ -1,5 +1,6 @@
-package ru.vasire.kafnetty.server.dto;
+package ru.vasire.kafnetty.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -11,5 +12,6 @@ public class UserProfileDto{
     private UUID id;
     private String login;
     private String nickName;
+    @JsonIgnoreProperties
     private UUID roomId;
 }

@@ -1,9 +1,9 @@
-package ru.vasire.kafnetty.server.dto;
+package ru.vasire.kafnetty.dto;
 
 import lombok.Getter;
 import lombok.Setter;
-import ru.vasire.kafnetty.server.types.MESSAGE_TYPE;
-import ru.vasire.kafnetty.server.types.OPERATION_TYPE;
+import ru.vasire.kafnetty.types.MESSAGE_TYPE;
+import ru.vasire.kafnetty.types.OPERATION_TYPE;
 
 import java.util.UUID;
 

@@ -1,14 +1,14 @@
-package ru.vasire.kafnetty.server.dto;
+package ru.vasire.kafnetty.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
-import ru.vasire.kafnetty.server.types.MESSAGE_TYPE;
-import ru.vasire.kafnetty.server.types.OPERATION_TYPE;
+import ru.vasire.kafnetty.types.MESSAGE_TYPE;
+import ru.vasire.kafnetty.types.OPERATION_TYPE;
 
-@Data
+@Getter
+@Setter
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class ErrorDto extends BaseDto {
     private final Integer errorCode;
@@ -20,5 +20,9 @@ public class ErrorDto extends BaseDto {
     }
     public static ErrorDto createCommonError(String errorMessage){
         return new ErrorDto(1001, errorMessage);
+    }
+
+    public ErrorDto() {
+        this(1001, "");
     }
 }

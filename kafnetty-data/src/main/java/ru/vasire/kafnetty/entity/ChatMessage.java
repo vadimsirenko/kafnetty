@@ -1,4 +1,4 @@
-package ru.vasire.kafnetty.server.entity;
+package ru.vasire.kafnetty.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
