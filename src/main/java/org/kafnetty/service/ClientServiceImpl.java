@@ -17,11 +17,11 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
-@RequiredArgsConstructor
 public class ClientServiceImpl implements ClientService {
 
     private static final Map<String, UserProfileDto> USER_PROFILES = new ConcurrentHashMap<>();
-    private final ClientRepository clientRepository;
+    @Autowired
+    private ClientRepository clientRepository;
     @Autowired
     private UserProfileDtoMapper userProfileDtoMapper;
     @Autowired

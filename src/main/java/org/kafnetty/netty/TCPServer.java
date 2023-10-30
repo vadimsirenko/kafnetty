@@ -1,4 +1,4 @@
-package org.kafnetty.server.netty;
+package org.kafnetty.netty;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;

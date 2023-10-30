@@ -14,13 +14,13 @@ import org.springframework.stereotype.Service;
 import java.util.UUID;
 
 @Service
-@RequiredArgsConstructor
-public final class ChatMessageService {
+public final class MessageServiceImpl implements MessageService {
     @Autowired
-    private final MessageMapper messageMapper;
+    private MessageMapper messageMapper;
 
-    private final MessageRepository messageRepository;
-
+    @Autowired
+    private MessageRepository messageRepository;
+    @Override
     public ChannelMessageDto processMessage(ChannelBaseDto message, Channel channel) {
         Message chatMessage = messageMapper.ChannelMessageDtoToChatMessage((ChannelMessageDto) message);
         if (!messageRepository.existsById(chatMessage.getId())) {
@@ -28,12 +28,12 @@ public final class ChatMessageService {
         }
         return messageMapper.MessageToChannelMessageDto(chatMessage);
     }
-
+    @Override
     public ChannelMessageListDto processMessageList(ChannelBaseDto message, Channel channel) {
         ChannelMessageListDto messageListDto = (ChannelMessageListDto) message;
         return getMessageListByRoomId(messageListDto.getRoomId(), messageListDto.getSenderId());
     }
-
+    @Override
     public ChannelMessageListDto getMessageListByRoomId(UUID roomId, UUID senderId) {
         ChannelMessageListDto messageListDto = new ChannelMessageListDto(roomId, senderId);
         if (messageListDto.getRoomId() == null) {

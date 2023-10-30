@@ -14,9 +14,9 @@ import org.springframework.stereotype.Service;
 import java.util.UUID;
 
 @Service
-@RequiredArgsConstructor
 public class RoomServiceImpl implements RoomService {
-    private final RoomRepository roomRepository;
+    @Autowired
+    private RoomRepository roomRepository;
     @Autowired
     private RoomMapper roomMapper;
 

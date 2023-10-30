@@ -1,6 +1,6 @@
 package org.kafnetty;
 
-import org.kafnetty.server.netty.TCPServer;
+import org.kafnetty.netty.TCPServer;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;

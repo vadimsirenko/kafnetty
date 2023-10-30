@@ -11,6 +11,8 @@ import lombok.Setter;
 import org.kafnetty.type.MESSAGE_TYPE;
 import org.kafnetty.type.OPERATION_TYPE;
 
+import java.util.UUID;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -25,6 +27,9 @@ import org.kafnetty.type.OPERATION_TYPE;
 public abstract class KafkaBaseDto<T extends KafkaBaseDto> {
     private static ObjectMapper MAPPER = new ObjectMapper();
     private MESSAGE_TYPE messageType;
+    private UUID kafkaMessageId = UUID.randomUUID();
+    private String clusterId;
+
     private OPERATION_TYPE operationType = OPERATION_TYPE.NONE;
     private Long ts;
 

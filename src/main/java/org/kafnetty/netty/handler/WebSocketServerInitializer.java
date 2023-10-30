@@ -1,4 +1,4 @@
-package org.kafnetty.server.netty.handler;
+package org.kafnetty.netty.handler;
 
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;

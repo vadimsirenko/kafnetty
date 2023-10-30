@@ -1,8 +1,14 @@
 server:
   port: 8181
-  web-socket-path: /websocket
-  static-path: /static
-  chat-path: /chat.html
+  web-socket-path: "/websocket"
+  static-path: "/static"
+  chat-path: "/chat.html"
+  cluster-id: "kafnetty-1"
+  kafka:
+    message-topic: "kafnetty-messages"
+    room-topic: "kafnetty-rooms"
+    client-topic: "kafnetty-clients"
+    servers: "localhost:9092"
   boss:
     thread:
       count: 2
@@ -25,6 +31,8 @@ spring:
     show-sql: true
     hibernate:
       ddl-auto: validate
+  main:
+    allow-circular-references: true
 logging:
   level:
     org:

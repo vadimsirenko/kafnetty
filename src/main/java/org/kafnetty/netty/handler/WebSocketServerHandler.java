@@ -1,10 +1,11 @@
-package org.kafnetty.server.netty.handler;
+package org.kafnetty.netty.handler;
 
 import io.netty.channel.*;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.websocketx.*;
 import lombok.RequiredArgsConstructor;
 import org.kafnetty.service.HttpRequestService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -12,11 +13,12 @@ import static io.netty.handler.codec.http.HttpHeaderNames.HOST;
 
 @Component
 @ChannelHandler.Sharable
-@RequiredArgsConstructor
+//@RequiredArgsConstructor
 @Qualifier("webSocketServerHandler")
 public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> {
     private static final String WEBSOCKET_PATH = "/websocket";
-    private final HttpRequestService httpRequestService;
+    @Autowired
+    private HttpRequestService httpRequestService;
     private WebSocketServerHandshaker handshaker;
 
     private static String getWebSocketLocation(HttpRequest req) {

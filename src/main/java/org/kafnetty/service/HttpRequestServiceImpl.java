@@ -27,10 +27,11 @@ import static io.netty.handler.codec.http.HttpResponseStatus.*;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 @Component
-@RequiredArgsConstructor
+//@RequiredArgsConstructor
 public class HttpRequestServiceImpl implements HttpRequestService {
 
-    private final ChatService chatService;
+    @Autowired
+    private ChatService chatService;
     @Value("${server.web-socket-path}")
     private String webSocketPath;
     @Value("${server.static-path}")
