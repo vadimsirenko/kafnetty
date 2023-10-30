@@ -9,10 +9,9 @@ import java.util.Map;
 
 public class JsonSerializer<T> implements Serializer<T> {
     public static final String OBJECT_MAPPER = "objectMapper";
+    private static final byte[] EMPTY_ARRAY = new byte[]{};
     private final String encoding = StandardCharsets.UTF_8.name();
     private ObjectMapper mapper;
-
-    private static final byte[] EMPTY_ARRAY = new byte[]{};
 
     @Override
     public void configure(Map<String, ?> configs, boolean isKey) {

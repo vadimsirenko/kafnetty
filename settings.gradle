@@ -1,6 +1,3 @@
 rootProject.name = 'kafnetty'
-include 'kafnetty-server'
 include 'kafnetty-consumer'
 include 'kafnetty-producer'
-include 'kafnetty-data'
-

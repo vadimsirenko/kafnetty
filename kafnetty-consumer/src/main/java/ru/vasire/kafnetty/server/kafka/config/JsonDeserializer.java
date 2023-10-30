@@ -15,7 +15,7 @@ public class JsonDeserializer<T> implements Deserializer<T> {
     private ObjectMapper mapper;
     private TypeReference<T> typeReference;
 
-     @Override
+    @Override
     @SuppressWarnings("unchecked")
     public void configure(Map<String, ?> configs, boolean isKey) {
         mapper = (ObjectMapper) configs.get(OBJECT_MAPPER);
@@ -33,8 +33,7 @@ public class JsonDeserializer<T> implements Deserializer<T> {
         try {
             if (data == null) {
                 return null;
-            }
-            else {
+            } else {
                 var valueAsString = new String(data, encoding);
                 return mapper.readValue(valueAsString, typeReference);
             }

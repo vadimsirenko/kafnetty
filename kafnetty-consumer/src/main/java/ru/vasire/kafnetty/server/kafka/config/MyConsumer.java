@@ -16,24 +16,18 @@ import java.util.Random;
 import static org.apache.kafka.clients.CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG;
 import static org.apache.kafka.clients.CommonClientConfigs.GROUP_ID_CONFIG;
 import static org.apache.kafka.clients.CommonClientConfigs.GROUP_INSTANCE_ID_CONFIG;
-import static org.apache.kafka.clients.consumer.ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG;
-import static org.apache.kafka.clients.consumer.ConsumerConfig.AUTO_OFFSET_RESET_CONFIG;
-import static org.apache.kafka.clients.consumer.ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG;
-import static org.apache.kafka.clients.consumer.ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG;
 import static org.apache.kafka.clients.consumer.ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG;
-import static org.apache.kafka.clients.consumer.ConsumerConfig.MAX_POLL_RECORDS_CONFIG;
-import static org.apache.kafka.clients.consumer.ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG;
+import static org.apache.kafka.clients.consumer.ConsumerConfig.*;
 import static ru.vasire.kafnetty.server.kafka.config.JsonDeserializer.OBJECT_MAPPER;
 import static ru.vasire.kafnetty.server.kafka.config.JsonDeserializer.TYPE_REFERENCE;
 
 
 public class MyConsumer {
-    private final KafkaConsumer<Long, StringValue> kafkaConsumer;
-    private final Random random = new Random();
-
     public static final String TOPIC_NAME = "MyTopic";
     public static final String GROUP_ID_CONFIG_NAME = "myKafkaConsumerGroup";
     public static final int MAX_POLL_INTERVAL_MS = 300;
+    private final KafkaConsumer<Long, StringValue> kafkaConsumer;
+    private final Random random = new Random();
 
     public MyConsumer(String bootstrapServers) {
         Properties props = new Properties();
@@ -49,8 +43,8 @@ public class MyConsumer {
         props.put(TYPE_REFERENCE, new TypeReference<StringValue>() {
         });
 
-         props.put(MAX_POLL_RECORDS_CONFIG, 3);
-         props.put(MAX_POLL_INTERVAL_MS_CONFIG, MAX_POLL_INTERVAL_MS);
+        props.put(MAX_POLL_RECORDS_CONFIG, 3);
+        props.put(MAX_POLL_INTERVAL_MS_CONFIG, MAX_POLL_INTERVAL_MS);
 
         kafkaConsumer = new KafkaConsumer<>(props);
         kafkaConsumer.subscribe(Collections.singletonList(TOPIC_NAME));

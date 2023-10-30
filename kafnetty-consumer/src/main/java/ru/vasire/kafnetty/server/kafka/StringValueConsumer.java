@@ -31,14 +31,14 @@ public class StringValueConsumer {
     }
 
     public void startConsuming() {
-       // executor.scheduleAtFixedRate(this::poll, 0, MAX_POLL_INTERVAL_MS * 2L, TimeUnit.MILLISECONDS);
+        // executor.scheduleAtFixedRate(this::poll, 0, MAX_POLL_INTERVAL_MS * 2L, TimeUnit.MILLISECONDS);
         executor.scheduleAtFixedRate(this::poll, 0, MAX_POLL_INTERVAL_MS / 2L, TimeUnit.MILLISECONDS);
     }
 
     private void poll() {
         log.info("poll records");
         ConsumerRecords<Long, StringValue> records = myConsumer.getConsumer().poll(timeout);
- //       sleep();
+        //       sleep();
         log.info("polled records.counter:{}", records.count());
         for (ConsumerRecord<Long, StringValue> kafkaRecord : records) {
             try {

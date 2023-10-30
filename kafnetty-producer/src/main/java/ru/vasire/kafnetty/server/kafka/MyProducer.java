@@ -1,29 +1,28 @@
 package ru.vasire.kafnetty.server.kafka;
 
 
-import ru.vasire.kafnetty.server.kafka.config.JsonSerializer;
-import ru.vasire.kafnetty.server.kafka.model.StringValue;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.common.serialization.LongSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.vasire.kafnetty.server.kafka.config.JsonSerializer;
+import ru.vasire.kafnetty.server.kafka.model.StringValue;
 
 import java.util.Properties;
 
-import static ru.vasire.kafnetty.server.kafka.config.JsonSerializer.OBJECT_MAPPER;
 import static org.apache.kafka.clients.CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG;
 import static org.apache.kafka.clients.CommonClientConfigs.CLIENT_ID_CONFIG;
 import static org.apache.kafka.clients.CommonClientConfigs.RETRIES_CONFIG;
 import static org.apache.kafka.clients.producer.ProducerConfig.*;
+import static ru.vasire.kafnetty.server.kafka.config.JsonSerializer.OBJECT_MAPPER;
 
 public class MyProducer {
+    public static final String TOPIC_NAME = "MyTopic";
     private static final Logger log = LoggerFactory.getLogger(MyProducer.class);
     private final KafkaProducer<Long, StringValue> kafkaProducer;
 
-    public static final String TOPIC_NAME = "MyTopic";
-
-    public MyProducer(String bootstrapServers)  {
+    public MyProducer(String bootstrapServers) {
         Properties props = new Properties();
         props.put(CLIENT_ID_CONFIG, "myKafkaProducer");
         props.put(BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
