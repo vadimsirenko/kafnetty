@@ -18,6 +18,8 @@ public class Message {
     @Id
     @NonNull
     private UUID id;
+    @Column(name = "cluster_id", nullable = false)
+    private String clusterId;
     @Column(name = "sender_id", nullable = false)
     private UUID senderId;
     @Column(name = "room_id", nullable = false)
@@ -26,4 +28,6 @@ public class Message {
     private String messageText;
     private Long ts;
     private String sender;
+    @Column(name = "is_sent")
+    private boolean isSent = false;
 }

@@ -14,9 +14,11 @@ create table client
 create table message
 (
     id           uuid not null primary key,
+    cluster_id  character varying(30),
     sender_id    uuid not null,
     sender       character varying(30),
     room_id      uuid null,
     message_text varchar(1024),
-    ts           bigint
+    ts           bigint,
+    is_sent     boolean
 );

@@ -15,9 +15,11 @@ public interface MessageMapper {
     @Mapping(ignore = true, target = "messageType")
     @Mapping(ignore = true, target = "operationType")
     ChannelMessageDto MessageToChannelMessageDto(Message message);
-    Message ChannelMessageDtoToChatMessage(ChannelMessageDto channelMessageDto);
+    @Mapping(ignore = true, target = "sent")
+    Message ChannelMessageDtoToMessage(ChannelMessageDto channelMessageDto);
     @Mapping(ignore = true, target = "kafkaMessageId")
     @Mapping(ignore = true, target = "clusterId")
     KafkaMessageDto ChannelMessageDtoToKafkaMessageDto(ChannelMessageDto channelMessageDto);
+    ChannelMessageDto KafkaMessageDtoToChannelMessageDto(KafkaMessageDto kafkaMessageDto);
 }
 

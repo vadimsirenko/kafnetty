@@ -3,5 +3,6 @@ package org.kafnetty.service;
 import org.kafnetty.dto.kafka.KafkaMessageDto;
 
 public interface KafkaProducerService {
-    void sendMessage(KafkaMessageDto kafkaMessageDto);
+    public interface KafkaProducerCallback{ void run(KafkaMessageDto kafkaMessageDto); }
+    void sendMessage(KafkaMessageDto kafkaMessageDto, KafkaProducerServiceImpl.KafkaProducerCallback kafkaProducerCallback);
 }

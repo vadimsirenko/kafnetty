@@ -19,9 +19,7 @@ public class ChatServiceImpl implements ChatService{
     private final ClientService clientService;
     private final MessageService messageService;
     private final RoomService roomService;
-    @Autowired
-    @Qualifier("kafkaProducerService")
-    private KafkaProducerService kafkaProducerService;
+    private final KafkaProducerService kafkaProducerService;
     private final ChannelRepository channelRepository;
 
     //private final Map<UUID, ChannelGroup> CHANNEL_GROUP_MAP = new ConcurrentHashMap<>();
@@ -58,10 +56,11 @@ public class ChatServiceImpl implements ChatService{
         ChannelBaseDto messageDto = ChannelBaseDto.decode(jsonMessage);
         switch (messageDto.getMessageType()) {
             case MESSAGE:
-                ChannelMessageDto channelMessageDto = messageService.processMessage(messageDto, channel);
+                ChannelMessageDto channelMessageDto = messageService.processMessage((ChannelMessageDto)messageDto, channel);
                 channelRepository.applyToRoom(clientService.getProfile(channel.id().asLongText()).getRoomId(),
                         channelMessageDto::writeAndFlush);
-                kafkaProducerService.sendMessage(messageMapper.ChannelMessageDtoToKafkaMessageDto(channelMessageDto));
+                kafkaProducerService.sendMessage(messageMapper.ChannelMessageDtoToKafkaMessageDto(channelMessageDto),
+                        kafkaMessageDto -> messageService.setMessageAsSended(messageMapper.KafkaMessageDtoToChannelMessageDto(kafkaMessageDto)));
                 break;
             case ROOM:
                 ChannelRoomDto channelRoomDto = roomService.processMessage(messageDto, channel);
@@ -70,7 +69,7 @@ public class ChatServiceImpl implements ChatService{
                 //kafkaProducerService.sendRoom(roomDto);
                 break;
             case MESSAGE_LIST:
-                ChannelMessageListDto channelMessageListDto = messageService.processMessageList(messageDto, channel);
+                ChannelMessageListDto channelMessageListDto = messageService.processMessageList((ChannelMessageListDto)messageDto, channel);
                 putChannel(channelMessageListDto.getRoomId(), channel);
                 channelMessageListDto.writeAndFlush(channel);
                 break;
