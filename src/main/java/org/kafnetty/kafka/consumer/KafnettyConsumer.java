@@ -14,14 +14,13 @@ import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 
 import static org.kafnetty.kafka.consumer.BaseConsumer.MAX_POLL_INTERVAL_MS;
 
 @Service
 @RequiredArgsConstructor
-public class MessageConsumerService {
-    private static final Logger log = LoggerFactory.getLogger(MessageConsumerService.class);
+public class KafnettyConsumer {
+    private static final Logger log = LoggerFactory.getLogger(KafnettyConsumer.class);
 
     private final MessageConsumer messageKafkaConsumer;
     private final RoomConsumer roomConsumer;
@@ -91,7 +90,7 @@ public class MessageConsumerService {
         }
     }
     @PreDestroy
-    public void stopPooling() {
+    public void stopConsuming() {
         log.info("Stop receiving data from topics");
         executorMessages.shutdown();
         executorRooms.shutdown();
