@@ -7,7 +7,6 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -32,9 +31,11 @@ public class KafnettyConfig {
 
     @Value("${server.so.backlog}")
     private int backlog;
-    @Autowired
-    @Qualifier("webSocketServerInitializer")
-    private ChannelHandler webSocketServerInitializer;
+    private final ChannelHandler webSocketServerInitializer;
+
+    public KafnettyConfig(@Qualifier("webSocketServerInitializer") ChannelHandler webSocketServerInitializer) {
+        this.webSocketServerInitializer = webSocketServerInitializer;
+    }
 
     @Bean(name = "serverBootstrap")
     public ServerBootstrap bootstrap() {
@@ -46,6 +47,7 @@ public class KafnettyConfig {
         Map<ChannelOption<?>, Object> tcpChannelOptions = tcpChannelOptions();
         Set<ChannelOption<?>> keySet = tcpChannelOptions.keySet();
         for (@SuppressWarnings("rawtypes") ChannelOption option : keySet) {
+            //noinspection unchecked
             b.option(option, tcpChannelOptions.get(option));
         }
         return b;
@@ -53,7 +55,7 @@ public class KafnettyConfig {
 
     @Bean(name = "tcpChannelOptions")
     public Map<ChannelOption<?>, Object> tcpChannelOptions() {
-        Map<ChannelOption<?>, Object> options = new HashMap<ChannelOption<?>, Object>();
+        Map<ChannelOption<?>, Object> options = new HashMap<>();
         options.put(ChannelOption.SO_KEEPALIVE, keepAlive);
         options.put(ChannelOption.SO_BACKLOG, backlog);
         return options;
