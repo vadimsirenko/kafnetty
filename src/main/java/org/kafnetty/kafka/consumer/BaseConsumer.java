@@ -1,4 +1,4 @@
-package org.kafnetty.kafka;
+package org.kafnetty.kafka.consumer;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -9,31 +9,19 @@ import org.apache.kafka.common.serialization.UUIDDeserializer;
 import org.kafnetty.dto.kafka.KafkaBaseDto;
 import org.kafnetty.exception.ConsumerException;
 import org.kafnetty.kafka.config.JsonDeserializer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Component;
 
 import java.net.InetAddress;
-import java.util.Collections;
 import java.util.Properties;
 import java.util.Random;
 import java.util.UUID;
 
 import static org.apache.kafka.clients.CommonClientConfigs.GROUP_INSTANCE_ID_CONFIG;
 import static org.apache.kafka.clients.consumer.ConsumerConfig.*;
-import static org.apache.kafka.clients.consumer.ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG;
-import static org.apache.kafka.clients.consumer.ConsumerConfig.MAX_POLL_RECORDS_CONFIG;
 
-@Component()
-public class MessageKafkaConsumer {
+public class BaseConsumer {
 
-    @Autowired
-    private ApplicationContext context;
-
-    public static final int MAX_POLL_INTERVAL_MS = 300;
+    public static final int MAX_POLL_INTERVAL_MS = 10000;//300;
 
     @Value("${server.kafka.message-topic}")
     public String MESSAGE_TOPIC_NAME;
@@ -47,15 +35,16 @@ public class MessageKafkaConsumer {
     public String CLUSTER_ID;
     @Value("${server.cluster-id}")
     public String GROUP_ID_CONFIG_NAME;
-    private static final Logger log = LoggerFactory.getLogger(MessageKafkaConsumer.class);
     @Getter
-    private KafkaConsumer<UUID, KafkaBaseDto> kafkaConsumer;
+    protected KafkaConsumer<UUID, KafkaBaseDto> kafkaConsumer;
     private final Random random = new Random();
+    protected final Properties props = new Properties();
+
     @PostConstruct
     public void init() {
-        Properties props = new Properties();
         props.put(BOOTSTRAP_SERVERS_CONFIG, BOOTSRTAP_SEVERS);
         props.put(GROUP_ID_CONFIG, GROUP_ID_CONFIG_NAME);
+        //props.put(GROUP_INSTANCE_ID_CONFIG, GROUP_ID_CONFIG_NAME);
         props.put(GROUP_INSTANCE_ID_CONFIG, makeGroupInstanceIdConfig());
         props.put(ENABLE_AUTO_COMMIT_CONFIG, "true");
         props.put(AUTO_COMMIT_INTERVAL_MS_CONFIG, "100");
@@ -68,11 +57,8 @@ public class MessageKafkaConsumer {
 
         props.put(MAX_POLL_RECORDS_CONFIG, 3);
         props.put(MAX_POLL_INTERVAL_MS_CONFIG, MAX_POLL_INTERVAL_MS);
-
-        kafkaConsumer = new KafkaConsumer<>(props);
-        kafkaConsumer.subscribe(Collections.singletonList(MESSAGE_TOPIC_NAME));
     }
-    public String makeGroupInstanceIdConfig() {
+    private String makeGroupInstanceIdConfig() {
         try {
             var hostName = InetAddress.getLocalHost().getHostName();
             return String.join("-", GROUP_ID_CONFIG_NAME, hostName, String.valueOf(random.nextInt(100_999_999)));

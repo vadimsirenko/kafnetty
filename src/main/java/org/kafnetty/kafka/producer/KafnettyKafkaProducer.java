@@ -1,10 +1,9 @@
-package org.kafnetty.kafka;
+package org.kafnetty.kafka.producer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.common.serialization.LongSerializer;
 import org.apache.kafka.common.serialization.UUIDSerializer;
 import org.kafnetty.dto.kafka.KafkaBaseDto;
 import org.kafnetty.kafka.config.JsonSerializer;
