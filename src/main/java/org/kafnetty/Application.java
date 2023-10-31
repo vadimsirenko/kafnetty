@@ -1,7 +1,7 @@
 package org.kafnetty;
 
 import org.kafnetty.kafka.consumer.KafnettyConsumer;
-import org.kafnetty.netty.TCPServer;
+import org.kafnetty.netty.KafnettyServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
@@ -21,6 +21,6 @@ public class Application {
         log.info("using logins: oleg, vadim, sergey");
         log.info("_____________________________________________");
         ctx.getBean(KafnettyConsumer.class).startConsuming();
-        ctx.getBean(TCPServer.class).start();
+        ctx.getBean(KafnettyServer.class).start();
     }
 }

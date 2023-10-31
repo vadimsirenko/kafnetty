@@ -9,7 +9,7 @@ import java.net.InetSocketAddress;
 
 @Component
 @RequiredArgsConstructor
-public class TCPServer {
+public class KafnettyServer {
     private final ServerBootstrap serverBootstrap;
     private final InetSocketAddress tcpPort;
 

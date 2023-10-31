@@ -4,18 +4,17 @@ import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.kafnetty.dto.kafka.KafkaBaseDto;
 import org.kafnetty.dto.kafka.KafkaMessageDto;
-import org.kafnetty.kafka.producer.KafnettyKafkaProducer;
+import org.kafnetty.kafka.producer.KafnettyProducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
 import java.util.function.Consumer;
 @Service
 @RequiredArgsConstructor
 public class KafkaProducerServiceImpl implements KafkaProducerService {
     private static final Logger log = LoggerFactory.getLogger(KafkaProducerServiceImpl.class);
-    private final KafnettyKafkaProducer kafkaProducer;
+    private final KafnettyProducer kafkaProducer;
 
     private final Consumer<KafkaBaseDto> sendAsk =
             message->log.info("asked, value {}:{}", message.getMessageType(), message.getKafkaMessageId());

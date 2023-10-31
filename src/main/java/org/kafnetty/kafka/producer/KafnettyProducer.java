@@ -24,7 +24,7 @@ import static org.apache.kafka.clients.producer.ProducerConfig.*;
 import static org.kafnetty.kafka.config.JsonSerializer.OBJECT_MAPPER;
 
 @Component()
-public class KafnettyKafkaProducer {
+public class KafnettyProducer {
 
     @Autowired
     private ApplicationContext context;
@@ -39,7 +39,7 @@ public class KafnettyKafkaProducer {
     public String BOOTSRTAP_SEVERS;
     @Value("${server.cluster-id}")
     public String CLUSTER_ID;
-    private static final Logger log = LoggerFactory.getLogger(KafnettyKafkaProducer.class);
+    private static final Logger log = LoggerFactory.getLogger(KafnettyProducer.class);
     @Getter
     private KafkaProducer<UUID, KafkaBaseDto> kafkaProducer;
 
