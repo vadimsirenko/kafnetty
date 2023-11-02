@@ -3,35 +3,56 @@ plugins {
     id 'io.spring.dependency-management' version "${dependencyManagement}"
     id 'org.springframework.boot' version "${springframeworkBoot}"
 }
-group = 'org.kafnetty'
-version = '1.0'
-
 repositories {
     mavenLocal()
     mavenCentral()
 }
-
+ext.libs = "$projectDir/libs"
+ext.compileLib = "${libs}/compile"
+ext.runtimeLib = "${libs}/runtime"
+ext.testCompileLib = "${libs}/testCompile"
+ext.testRuntimeLib = "${libs}/testRuntime"
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'io.netty:netty-all'
-    implementation 'org.flywaydb:flyway-core'
-    implementation 'org.springframework.kafka:spring-kafka'
-    compileOnly 'org.projectlombok:lombok'
-    implementation "org.mapstruct:mapstruct:$mapstruct"
-    runtimeOnly 'org.postgresql:postgresql'
-    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
-    implementation "org.apache.tika:tika-core:$tika"
+    if (gradle.startParameter.isOffline()) {
+        compile fileTree(dir: compileLib)
+        runtime fileTree(dir: runtimeLib)
+        testCompile fileTree(dir: testCompileLib)
+        testRuntime fileTree(dir: testRuntimeLib)
+    } else {
+        implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+        implementation 'io.netty:netty-all'
+        implementation 'org.flywaydb:flyway-core'
+        implementation 'org.springframework.kafka:spring-kafka'
+        compileOnly 'org.projectlombok:lombok'
+        implementation "org.mapstruct:mapstruct:$mapstruct"
+        runtimeOnly 'org.postgresql:postgresql'
+        implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
+        implementation "org.apache.tika:tika-core:$tika"
 
-    annotationProcessor 'org.projectlombok:lombok'
-    annotationProcessor "org.mapstruct:mapstruct-processor:$mapstruct"
+        annotationProcessor 'org.projectlombok:lombok'
+        annotationProcessor "org.mapstruct:mapstruct-processor:$mapstruct"
 
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'io.projectreactor:reactor-test'
-    testImplementation 'org.springframework.kafka:spring-kafka-test'
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+        testImplementation 'io.projectreactor:reactor-test'
+        testImplementation 'org.springframework.kafka:spring-kafka-test'
 
-
+    }
+}
+task deleteLibs(type: Delete) {
+    delete 'libs/compile'
+    delete 'libs/runtime'
+    delete 'libs/testCompile'
+    delete 'libs/testRuntime'
 }
 
+task copyToLibs(dependsOn: 'deleteLibs') << {
+    ['compile', 'runtime', 'testCompile', 'testRuntime'].each { scope ->
+        copy {
+            from configurations.getByName(scope).files
+            into "${libs}/${scope}"
+        }
+    }
+}
 test {
     useJUnitPlatform()
 }
