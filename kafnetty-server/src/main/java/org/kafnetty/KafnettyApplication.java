@@ -20,7 +20,7 @@ public class KafnettyApplication {
         log.info("Open chat at url http://localhost:{}{}",port,chatPath);
         log.info("using logins: oleg, vadim, sergey");
         log.info("_____________________________________________");
-        ctx.getBean(KafnettyConsumer.class).startConsuming();
+        //ctx.getBean(KafnettyConsumer.class).startConsuming();
         ctx.getBean(KafnettyServer.class).start();
     }
 }

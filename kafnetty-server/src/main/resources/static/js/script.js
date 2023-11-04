@@ -25,14 +25,62 @@
             this.$chatAbout = $('.chat-about');
             this.$chatHistoryList = this.$chatHistory.find('ul');
             this.$roomSetList = this.$roomSet.find('ul');
+            this.$createRoomShowElements = $('.create-room, .fidebox');
+            this.$createRoomForm = $('.create-room');
+            this.$createRoomFormCancel = this.$createRoomForm.find('#create-room-cancel');
+            this.$createRoomFormOk = this.$createRoomForm.find('#create-room-ok');
+            this.$roomNameInput = this.$createRoomForm.find('#create-room-name');
+            this.$createRoomValidate = this.$createRoomForm.find('.validate-error');
+            this.$roomAddButton = $('.cell-add');
         },
         bindEvents: function () {
             this.$button.on('click', this.addMessage.bind(this));
             this.$textarea.on('keyup', this.addMessageEnter.bind(this));
             this.$roomSetList.on("click", "li", this.chatClick.bind(this));
+            this.$createRoomFormCancel.on("click", this.createRoomFormCancel.bind(this));
+            this.$createRoomFormOk.on("click", this.createRoomFormOk.bind(this));
+            this.$roomAddButton.on("click", this.createRoom.bind(this));
+        }, createRoom: function () {
+            this.$roomNameInput.val('');
+            this.$createRoomShowElements.fadeIn('slow');
+        },
+        createRoomFormOk: function () {
+            if (this.$roomNameInput.val().trim() === '' || !window.WebSocket) {
+                return;
+            }
+            try {
+                if (this.socket.readyState === WebSocket.OPEN) {
+
+                    let message = {
+                        "id": this.uuidv4(),
+                        "messageType": "ROOM",
+                        "operationType": "CREATE",
+                        "ts": new Date().getTime(),
+                        "name": this.$roomNameInput.val().trim()
+                    };
+                    let messageJSON = JSON.stringify(message);
+                    this.socket.send(messageJSON);
+                    this.$roomNameInput.val('');
+                    this.$createRoomValidate.text('');
+                    this.$createRoomValidate.hide();
+                    this.$createRoomShowElements.hide();
+                } else {
+                    this.$createRoomValidate.text("The socket is not open.");
+                    this.$createRoomValidate.show();
+                    //alert("The socket is not open.");
+                }
+            } catch (e) {
+                this.$createRoomValidate.text(e);
+                this.$createRoomValidate.show();
+            }
+        },
+        createRoomFormCancel: function () {
+            this.$createRoomValidate.text('');
+            this.$createRoomValidate.hide();
+            this.$createRoomShowElements.hide();
         },
         addMessage: function () {
-            this.messageToSend = this.$textarea.val()
+            this.messageToSend = this.$textarea.val();
             this.sendMessage();
         },
         addMessageEnter: function (event) {
@@ -111,7 +159,7 @@
                 let encodedString = Base64.encode(configJSON);
 
                 try {
-                    this.socket = new WebSocket("ws://"+window.location.host+"/websocket/?request=" + encodedString);
+                    this.socket = new WebSocket("ws://" + window.location.host + "/websocket/?request=" + encodedString);
                 } catch (e) {
                     console.log("server unnavigable");
                     return;
@@ -137,6 +185,10 @@
             if (data.messageType === "ROOM_LIST") {
                 console.log(data);
                 this.processRoomList(data.operationType, data.rooms);
+            }
+            if (data.messageType === "ROOM") {
+                console.log(data);
+                this.processRoom(data);
             }
             if (data.messageType === "CLIENT") {
                 console.log(data);
@@ -164,6 +216,16 @@
             this.updateTitleChat();
             this.$chatHistoryList.append(this.renderedMessage(message));
             this.scrollToBottom();
+        },
+        processRoom: function (room) {
+            let templateRoom = Handlebars.compile($("#room-item-template").html());
+            let contextResponse = {
+                name: room.name,
+                id: room.id
+            };
+            this.$roomSetList.append(templateRoom(contextResponse));
+            searchRoomFilter.init();
+            this.coloredChatList();
         },
         processInfo: function (info) {
             this.$chatHistoryList.append(this.renderedInfoMessage(info));

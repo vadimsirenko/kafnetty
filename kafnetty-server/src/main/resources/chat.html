@@ -4,43 +4,57 @@
     <meta charset="utf-8"/>
     <title>Netty Kafka Chat</title>
     <link href="static/css/icons-kafnetty.min.css" rel="stylesheet" type='text/css'/>
-    <link href="static/css/reset.min.css" rel="stylesheet" type='text/css' />
+    <link href="static/css/reset.min.css" rel="stylesheet" type='text/css'/>
     <link href="static/css/style.min.css" rel="stylesheet" type='text/css'/>
     <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
 </head>
 <body>
-<div class="container clearfix">
-    <div class="room-set" id="chat-list">
-        <div class="search">
-            <input placeholder="search" type="text"/>
-            <i class="kn kn-glass"></i>
-        </div>
-        <ul class="list">
-            <li class="clearfix"></li>
-        </ul>
-    </div>
-    <div class="chat">
-
-        <div class="chat-header clearfix">
-            <div class="kn-people-group" style="font-size: 35px;display: inline-block;"></div>
-            <div class="chat-about" style="display: inline-block;">
-
-                <!--
-                    <div class="chat-with"></div>
-                    <div class="chat-num-messages"></div>
-                -->
+<div class="fidebox"></div>
+<div style="padding-top: 20px;">
+    <div class="container clearfix">
+        <div class="room-set" id="chat-list">
+            <div>
+                <table class="search">
+                    <tr>
+                        <td class="cell-search">
+                            <input placeholder="search" type="text"/>
+                            <i class="kn kn-glass"></i>
+                        </td>
+                        <td class="cell-add">
+                            <input type="button"/>
+                            <i class="kn kn-plus"></i>
+                        </td>
+                    </tr>
+                </table>
             </div>
-        </div>
-
-        <div class="chat-history">
-            <ul>
-                <li></li>
+            <ul class="list">
+                <li class="clearfix"></li>
             </ul>
         </div>
+        <div class="chat">
 
-        <div class="chat-message clearfix">
-            <textarea id="message-to-send" name="message-to-send" placeholder="Type your message" rows="3"></textarea>
-            <button><i class="kn-envelop"></i>Отправить</button>
+            <div class="chat-header clearfix">
+                <div class="kn-people-group" style="font-size: 35px;display: inline-block;"></div>
+                <div class="chat-about" style="display: inline-block;">
+
+                    <!--
+                        <div class="chat-with"></div>
+                        <div class="chat-num-messages"></div>
+                    -->
+                </div>
+            </div>
+
+            <div class="chat-history">
+                <ul>
+                    <li></li>
+                </ul>
+            </div>
+
+            <div class="chat-message clearfix">
+                <textarea id="message-to-send" name="message-to-send" placeholder="Type your message"
+                          rows="3"></textarea>
+                <button><i class="kn-envelop"></i>Отправить</button>
+            </div>
         </div>
     </div>
 </div>
@@ -54,6 +68,15 @@
         </div>
     </li>
     {{/each}}
+</script>
+
+<script id="room-item-template" type="text/x-handlebars-template">
+    <li class="clearfix">
+        <div class="name chat-item" data-id="{{id}}">
+            <i class="kn kn-circle chats"></i>
+            {{name}}
+        </div>
+    </li>
 </script>
 
 <script id="message-response-template" type="text/x-handlebars-template">
@@ -111,12 +134,19 @@
     <div class="chat-with">{{chatName}}</div>
     <div class="chat-num-messages">{{chatStatistic}}</div>
 </script>
+<div class="create-room" style="display: none;">
+    <h2>Введте наименование нового чата</h2>
+    <input type="text" name="create-room-name" id="create-room-name">
+    <div class="action-buttons">
+        <a href="#cancel" id="create-room-ok" class="button15" >Сохранить</a>
+        <a href="#cancel" id="create-room-cancel" class="button15" >Отменить</a>
+    </div>
+</div>
 
 <script src="static/js/base64.min.js"></script>
 <script src="static/js/jquery-3.7.1.min.js"></script>
 <script src="static/js/handlebars.min.js"></script>
 <script src="static/js/list.min.js"></script>
 <script src="static/js/script.js"></script>
-
 </body>
 </html>
