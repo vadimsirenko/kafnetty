@@ -25,13 +25,19 @@
             this.$chatAbout = $('.chat-about');
             this.$chatHistoryList = this.$chatHistory.find('ul');
             this.$roomSetList = this.$roomSet.find('ul');
-            this.$createRoomShowElements = $('.create-room, .fidebox');
-            this.$createRoomForm = $('.create-room');
+            this.$createRoomForm = $('#create-room');
+            this.$createRoomShowElements = $('#create-room, .fidebox');
             this.$createRoomFormCancel = this.$createRoomForm.find('#create-room-cancel');
             this.$createRoomFormOk = this.$createRoomForm.find('#create-room-ok');
             this.$roomNameInput = this.$createRoomForm.find('#create-room-name');
             this.$createRoomValidate = this.$createRoomForm.find('.validate-error');
             this.$roomAddButton = $('.cell-add');
+            this.$loginForm = $('#login-form');
+            this.$loginFormShowElements = $('#login-form, .fidebox');
+            this.$loginFormCancel = this.$loginForm.find('#login-form-cancel');
+            this.$loginFormOk = this.$loginForm.find('#login-form-ok');
+            this.$loginFormNameInput = this.$loginForm.find('.field-name');
+            this.$loginFormValidate = this.$loginForm.find('.validate-error');
         },
         bindEvents: function () {
             this.$button.on('click', this.addMessage.bind(this));
@@ -40,6 +46,8 @@
             this.$createRoomFormCancel.on("click", this.createRoomFormCancel.bind(this));
             this.$createRoomFormOk.on("click", this.createRoomFormOk.bind(this));
             this.$roomAddButton.on("click", this.createRoom.bind(this));
+
+            this.$loginFormOk.on("click", this.loginFormOkClick.bind(this));
         }, createRoom: function () {
             this.$roomNameInput.val('');
             this.$createRoomShowElements.fadeIn('slow');
@@ -67,7 +75,6 @@
                 } else {
                     this.$createRoomValidate.text("The socket is not open.");
                     this.$createRoomValidate.show();
-                    //alert("The socket is not open.");
                 }
             } catch (e) {
                 this.$createRoomValidate.text(e);
@@ -91,7 +98,7 @@
         },
         chatClick: function (event) {
             let roomId = $(event.target).attr('data-id')
-            if (roomId == undefined)
+            if (roomId === undefined)
                 return;
             this.updateTitleChat();
             console.log("roomId=" + roomId);
@@ -132,13 +139,21 @@
             return date.toLocaleString();
         },
         loginUser: function () {
-            let username = window.prompt("Enter your username:", "");
-            if (username.toString().length > 2) {
-                this.login = username;
-                this.connectToChatServer(username);
-            } else {
-                alert("Your username must be at least two characters.");
-                loginUser();
+            this.$loginFormNameInput.val('');
+            this.$loginFormShowElements.fadeIn('slow');
+        },
+        loginFormOkClick: function (){
+            this.$loginFormValidate.text('');
+            this.$loginFormValidate.hide();
+            if (this.$loginFormNameInput.val().trim() === '') {
+                return;
+            }else if(this.$loginFormNameInput.val().trim().length > 2)
+            {
+                this.login = this.$loginFormNameInput.val().trim();
+                this.connectToChatServer(this.login);
+            }else {
+                this.$loginFormValidate.text("Your username must be at least two characters.(oleg, vadim, sergey)");
+                this.$loginFormValidate.show();
             }
         },
         connectToChatServer: function (userLogin) {
@@ -162,18 +177,30 @@
                     this.socket = new WebSocket("ws://" + window.location.host + "/websocket/?request=" + encodedString);
                 } catch (e) {
                     console.log("server unnavigable");
+                    this.$loginFormValidate.text(e.messageText);
+                    this.$loginFormValidate.show();
                     return;
                 }
                 this.socket.addEventListener('message', this.receiveMessage.bind(this));
                 this.socket.addEventListener('open', this.socketOpen.bind(this));
                 this.socket.addEventListener('close', this.socketClose.bind(this));
+                this.socket.addEventListener('error', this.socketError.bind(this));
             }
         },
         socketClose: function (event) {
             console.log("websocket closed");
         },
+        socketError: function (error) {
+            //console.log("websocket error");
+            console.log('WebSocket error: ', error);
+            this.$loginFormValidate.text("Неверный логин. (oleg, vadim, sergey)");
+            this.$loginFormValidate.show();
+        },
         socketOpen: function (event) {
             console.log("websocket opened");
+            this.$loginFormValidate.text('');
+            this.$loginFormValidate.hide();
+            this.$loginFormShowElements.hide();
         },
         receiveMessage: function (event) {
             let data = JSON.parse(event.data);
