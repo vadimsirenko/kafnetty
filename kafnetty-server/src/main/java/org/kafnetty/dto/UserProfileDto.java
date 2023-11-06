@@ -12,6 +12,7 @@ public class UserProfileDto {
     private UUID id;
     private String login;
     private String nickName;
+    private String email;
     @JsonIgnoreProperties
     private UUID roomId;
 }

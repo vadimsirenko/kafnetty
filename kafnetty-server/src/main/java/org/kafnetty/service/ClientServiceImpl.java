@@ -10,6 +10,7 @@ import org.kafnetty.entity.Client;
 import org.kafnetty.mapper.ClientMapper;
 import org.kafnetty.mapper.UserProfileDtoMapper;
 import org.kafnetty.repository.ClientRepository;
+import org.kafnetty.type.OPERATION_TYPE;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -24,9 +25,11 @@ public class ClientServiceImpl implements ClientService {
     private final ClientRepository clientRepository;
     private final UserProfileDtoMapper userProfileDtoMapper;
     private final ClientMapper clientMapper;
+
     private static boolean checkToken(ChannelClientDto req) {
         return true;
     }
+
     @Override
     public UserProfileDto getProfile(String channelLongId) {
         if (channelLongId != null) {
@@ -34,10 +37,12 @@ public class ClientServiceImpl implements ClientService {
         }
         return null;
     }
+
     @Override
     public boolean existsUserProfile(String channelLongId) {
         return USER_PROFILES.containsKey(channelLongId);
     }
+
     @Override
     public void setRoomForUserProfile(UUID roomId, String channelLongId) {
         if (USER_PROFILES.containsKey(channelLongId)) {
@@ -46,12 +51,14 @@ public class ClientServiceImpl implements ClientService {
             USER_PROFILES.put(channelLongId, userProfileDto);
         }
     }
+
     @Override
     public void removeProfile(String channelLongId) {
         if (USER_PROFILES.containsKey(channelLongId)) {
             USER_PROFILES.remove(channelLongId);
         }
     }
+
     @Override
     public ChannelClientDto processMessage(ChannelBaseDto message, Channel channel) {
         ChannelClientDto clientDto = (ChannelClientDto) message;
@@ -62,10 +69,22 @@ public class ClientServiceImpl implements ClientService {
             // TODO обработать неверный вход
             throw new RuntimeException("User is not authorized");
         }
-        Client client = clientRepository.findByLogin(clientDto.getLogin()).orElse(null);
-        if (client == null) {
-            // TODO обработать неверный вход
-            throw new RuntimeException("User is not authorized");
+        Client client;
+        if (clientDto.getOperationType() == OPERATION_TYPE.LOGON) {
+            client = clientRepository.findByLogin(clientDto.getLogin()).orElse(null);
+            if (client == null) {
+                // TODO обработать неверный вход
+                throw new RuntimeException("User is not authorized");
+            }
+        } else {
+            client = clientRepository.findById(clientDto.getId()).orElse(null);
+            if (client == null) {
+                // TODO обработать неверный вход
+                throw new RuntimeException("User is not authorized");
+            }
+            client.setNickName(clientDto.getNickName());
+            client.setEmail(clientDto.getEmail());
+            client = clientRepository.saveAndFlush(client);
         }
         client.setRoomId(clientDto.getRoomId());
         USER_PROFILES.put(channel.id().asLongText(), userProfileDtoMapper.ClientToUserProfileDto(client));

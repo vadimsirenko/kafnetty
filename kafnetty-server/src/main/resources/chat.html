@@ -35,8 +35,10 @@
 
             <div class="chat-header clearfix">
                 <div class="kn-people-group" style="font-size: 35px;display: inline-block;"></div>
-                <div class="chat-about" style="display: inline-block;">
+                <div class="chat-about">
                 </div>
+                <div class="kn-cog"></div>
+                <div class="kn-exit"></div>
             </div>
 
             <div class="chat-history">
@@ -144,6 +146,18 @@
     <div class="action-buttons">
         <a href="#" id="login-form-ok" class="button15">Войти</a>
         <a href="#" id="login-form-cancel" class="button15">Отменить</a>
+    </div>
+</div>
+<div class="modal-form" id="profile-form" style="display: none;">
+    <h2>Редактирование профиля</h2>
+    <label class="field-title" for="nikname">Ник</label>
+    <input type="text" name="nikname" id="nikname" class="field-name">
+    <label class="field-title" for="email">e-mail</label>
+    <input type="text" name="email" id="email"  class="field-name">
+    <div class="validate-error"></div>
+    <div class="action-buttons">
+        <a href="#" id="profile-form-ok" class="button15">Обновить</a>
+        <a href="#" id="profile-form-cancel" class="button15">Отменить</a>
     </div>
 </div>
 <script src="static/js/base64.min.js"></script>

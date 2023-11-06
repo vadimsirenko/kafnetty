@@ -84,6 +84,7 @@ public class ChatServiceImpl implements ChatService {
             case CLIENT:
                 ChannelClientDto channelClientDto = clientService.processMessage(messageDto, channel);
                 putChannel(channelClientDto.getRoomId(), channel);
+                channelClientDto.writeAndFlush(channel);
                 break;
             default:
         }

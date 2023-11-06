@@ -109,7 +109,6 @@ body {
     /*float: left;*/
     padding-left: 20px;
     margin-top: 6px;
-
     display: inline-block;
 }
 
@@ -121,7 +120,12 @@ body {
 .chat .chat-header .chat-num-messages {
     color: #92959E;
 }
-
+.chat-header .kn-exit, .chat-header .kn-cog{
+    font-size: 18px;
+    display: inline-block;
+    margin-top: 6px;
+    vertical-align: top;
+}
 .chat .chat-history {
     padding: 30px 30px 20px;
     border-bottom: 2px solid white;
@@ -298,17 +302,19 @@ body {
 
 .modal-form h2 {
     font-size: 16px;
+    font-weight: bold;
     align-content: center;
     text-align: center;
-    margin: 20px;
+    margin: 10px 20px 20px 20px;
+    color: lightgrey;
 }
 
 .modal-form .validate-error {
     margin-top: 5px;
     margin-left: 20px;
     text-align: left;
-    color: #ff9292;
     display: none;
+    color: lightgrey;
 }
 
 .modal-form .field-name {
@@ -318,6 +324,10 @@ body {
     border-radius: 3px;
     border: none;
     border-width: 0px;
+    padding: 5px;
+}
+.modal-form .field-title{
+    margin: 0px 50px 0px 50px;
     padding: 5px;
 }
 
@@ -357,4 +367,8 @@ a.button15:active {
 
 .modal-form .action-buttons {
     padding-left: 140px;
+}
+.chat-about{
+    width:370px;
+    display: inline-block;
 }

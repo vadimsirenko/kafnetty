@@ -14,7 +14,6 @@ public interface UserProfileDtoMapper {
 
     UserProfileDto ClientToUserProfileDto(Client client);
 
-    @Mapping(ignore = true, target = "email")
     @Mapping(ignore = true, target = "token")
     @Mapping(ignore = true, target = "messageType")
     @Mapping(ignore = true, target = "operationType")
