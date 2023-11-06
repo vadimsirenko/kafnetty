@@ -2,6 +2,7 @@ package org.kafnetty.service;
 
 import io.netty.channel.Channel;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.kafnetty.dto.UserProfileDto;
 import org.kafnetty.dto.channel.*;
 import org.kafnetty.dto.kafka.KafkaMessageDto;
@@ -17,6 +18,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ChatServiceImpl implements ChatService {
     private final ClientService clientService;
     private final MessageService messageService;

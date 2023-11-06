@@ -8,6 +8,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.*;
 import io.netty.util.CharsetUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.tika.Tika;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -22,10 +23,10 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class HttpResponseProcessor {
     private final ResourceLoader resourceLoader;
     private static final Tika tika = new Tika();
-
 
     public void handleResource(ChannelHandlerContext ctx, HttpRequest request, String resourcePath) {
         int questionIndex = resourcePath.indexOf("?");
@@ -53,7 +54,7 @@ public class HttpResponseProcessor {
             future.addListener(ChannelFutureListener.CLOSE);
         } catch (IOException e) {
             sendHttpResponse(ctx, request, new DefaultFullHttpResponse(HTTP_1_1, NOT_FOUND));
-            throw new RuntimeException(e);
+            log.error("error at process static resource", e);
         }
     }
 

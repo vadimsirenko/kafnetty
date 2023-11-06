@@ -2,6 +2,7 @@ package org.kafnetty.service;
 
 import io.netty.channel.Channel;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.kafnetty.dto.UserProfileDto;
 import org.kafnetty.dto.channel.ChannelBaseDto;
 import org.kafnetty.dto.channel.ChannelClientDto;
@@ -17,20 +18,15 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ClientServiceImpl implements ClientService {
-
     private static final Map<String, UserProfileDto> USER_PROFILES = new ConcurrentHashMap<>();
-
     private final ClientRepository clientRepository;
-
     private final UserProfileDtoMapper userProfileDtoMapper;
-
     private final ClientMapper clientMapper;
-
     private static boolean checkToken(ChannelClientDto req) {
         return true;
     }
-
     @Override
     public UserProfileDto getProfile(String channelLongId) {
         if (channelLongId != null) {
@@ -38,12 +34,10 @@ public class ClientServiceImpl implements ClientService {
         }
         return null;
     }
-
     @Override
     public boolean existsUserProfile(String channelLongId) {
         return USER_PROFILES.containsKey(channelLongId);
     }
-
     @Override
     public void setRoomForUserProfile(UUID roomId, String channelLongId) {
         if (USER_PROFILES.containsKey(channelLongId)) {
@@ -52,14 +46,12 @@ public class ClientServiceImpl implements ClientService {
             USER_PROFILES.put(channelLongId, userProfileDto);
         }
     }
-
     @Override
     public void removeProfile(String channelLongId) {
         if (USER_PROFILES.containsKey(channelLongId)) {
             USER_PROFILES.remove(channelLongId);
         }
     }
-
     @Override
     public ChannelClientDto processMessage(ChannelBaseDto message, Channel channel) {
         ChannelClientDto clientDto = (ChannelClientDto) message;

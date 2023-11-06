@@ -3,6 +3,7 @@ package org.kafnetty.netty.handler;
 import io.netty.channel.*;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.websocketx.*;
+import lombok.extern.slf4j.Slf4j;
 import org.kafnetty.service.HttpRequestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -13,6 +14,7 @@ import static io.netty.handler.codec.http.HttpHeaderNames.HOST;
 @Component
 @ChannelHandler.Sharable
 @Qualifier("webSocketServerHandler")
+@Slf4j
 public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> {
     private static final String WEBSOCKET_PATH = "/websocket";
     @Autowired

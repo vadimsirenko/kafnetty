@@ -2,6 +2,7 @@ package org.kafnetty.service;
 
 import io.netty.channel.Channel;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.kafnetty.dto.channel.ChannelRoomDto;
 import org.kafnetty.dto.channel.ChannelRoomListDto;
 import org.kafnetty.entity.Room;
@@ -16,17 +17,16 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class RoomServiceImpl implements RoomService {
     private final KafnettyProducer kafkaProducer;
     private final RoomRepository roomRepository;
     private final RoomMapper roomMapper;
-
     @Override
     public ChannelRoomDto processLocalMessage(ChannelRoomDto message, Channel channel) {
         message.setClusterId(kafkaProducer.getGroupId());
         return processMessage(message);
     }
-
     @Override
     public ChannelRoomDto processMessage(ChannelRoomDto roomDto) {
         Room room = roomMapper.ChannelRoomDtoToRoom(roomDto);
@@ -43,14 +43,12 @@ public class RoomServiceImpl implements RoomService {
         }
         return roomMapper.RoomToChannelRoomDto(room);
     }
-
     @Override
     public ChannelRoomListDto getRoomList(UUID clientId) {
         ChannelRoomListDto roomListDto = new ChannelRoomListDto();
         roomListDto.setRooms(roomRepository.findAll().stream().map(roomMapper::RoomToChannelRoomDto).toList());
         return roomListDto;
     }
-
     @Override
     public void setMessageAsSended(ChannelRoomDto channelRoomDto) {
         Optional<Room> roomOptional = roomRepository.findById(channelRoomDto.getId());
