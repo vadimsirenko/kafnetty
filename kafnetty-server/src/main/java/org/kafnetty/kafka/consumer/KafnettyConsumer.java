@@ -1,115 +1,86 @@
 package org.kafnetty.kafka.consumer;
 
-import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
+import lombok.extern.slf4j.Slf4j;
 import org.kafnetty.dto.channel.ChannelMessageDto;
+import org.kafnetty.dto.channel.ChannelRoomDto;
 import org.kafnetty.dto.kafka.KafkaBaseDto;
 import org.kafnetty.dto.kafka.KafkaMessageDto;
+import org.kafnetty.dto.kafka.KafkaRoomDto;
 import org.kafnetty.mapper.MessageMapper;
+import org.kafnetty.mapper.RoomMapper;
 import org.kafnetty.repository.ChannelRepository;
-import org.kafnetty.service.ClientService;
 import org.kafnetty.service.MessageService;
 import org.kafnetty.service.RoomService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.annotation.DltHandler;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.annotation.RetryableTopic;
+import org.springframework.kafka.support.Acknowledgment;
+import org.springframework.kafka.support.converter.ConversionException;
+import org.springframework.kafka.support.serializer.DeserializationException;
+import org.springframework.messaging.converter.MessageConversionException;
+import org.springframework.messaging.handler.invocation.MethodArgumentResolutionException;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Duration;
-import java.util.UUID;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
-import static org.kafnetty.kafka.consumer.BaseConsumer.MAX_POLL_INTERVAL_MS;
-
-@Service
+@Component
+@Slf4j
 @RequiredArgsConstructor
 public class KafnettyConsumer {
-    private static final Logger log = LoggerFactory.getLogger(KafnettyConsumer.class);
+    @Value("${spring.kafka.group-id}")
+    private String groupId;
 
-    private final MessageConsumer messageKafkaConsumer;
-    private final RoomConsumer roomConsumer;
-    private final ClientConsumer clientConsumer;
+    private final MessageMapper messageMapper;
+    private final RoomMapper roomMapper;
     private final MessageService messageService;
     private final RoomService roomService;
-    private final ClientService clientService;
     private final ChannelRepository channelRepository;
-    private final MessageMapper messageMapper;
-    private final Duration timeout = Duration.ofMillis(2_000);
 
-    private final ScheduledExecutorService executorMessages = Executors.newScheduledThreadPool(1);
-    private final ScheduledExecutorService executorRooms = Executors.newScheduledThreadPool(1);
-    private final ScheduledExecutorService executorClients = Executors.newScheduledThreadPool(1);
-
-    public void startConsuming() {
-        // executor.scheduleAtFixedRate(this::poll, 0, MAX_POLL_INTERVAL_MS * 2L, TimeUnit.MILLISECONDS);
-        executorMessages.scheduleAtFixedRate(this::messagePoll, 0, MAX_POLL_INTERVAL_MS / 2L, TimeUnit.MILLISECONDS);
-        executorRooms.scheduleAtFixedRate(this::roomPoll, 0, MAX_POLL_INTERVAL_MS / 2L, TimeUnit.MILLISECONDS);
-        executorClients.scheduleAtFixedRate(this::clientPoll, 0, MAX_POLL_INTERVAL_MS / 2L, TimeUnit.MILLISECONDS);
+    @RetryableTopic(kafkaTemplate = "kafkaTemplate",
+            exclude = {DeserializationException.class,
+                    MessageConversionException.class,
+                    ConversionException.class,
+                    MethodArgumentResolutionException.class,
+                    NoSuchMethodException.class,
+                    ClassCastException.class},
+            attempts = "4",
+            backoff = @Backoff(delay = 3000, multiplier = 1.5, maxDelay = 15000)
+    )
+    @KafkaListener(topics = "${spring.kafka.topic.name}", groupId = "${spring.kafka.group-id}")
+    @Transactional
+    public void paymentEventListener(KafkaBaseDto paymentEvent, Acknowledgment ack) {
+        log.info("status handler receive data = {}", paymentEvent);
+        try {
+            //paymentRecordHandler.onEvent(paymentEvent);
+            ack.acknowledge();
+        } catch (Exception e) {
+            log.warn("Fail to handle event {}.", paymentEvent, e);
+        }
     }
 
-    private void messagePoll() {
-        log.info("poll records");
-        ConsumerRecords<UUID, KafkaBaseDto> records = messageKafkaConsumer.getKafkaConsumer().poll(timeout);
-        //       sleep();
-        log.info("polled records.counter:{}", records.count());
-        for (ConsumerRecord<UUID, KafkaBaseDto> kafkaRecord : records) {
-            try {
-                var key = kafkaRecord.key();
-                var value = kafkaRecord.value();
-                if(!value.getClusterId().equals(messageKafkaConsumer.CLUSTER_ID) && value instanceof KafkaMessageDto) {
-                    ChannelMessageDto channelMessageDto = messageMapper.KafkaMessageDtoToChannelMessageDto((KafkaMessageDto)value);
+    @DltHandler
+    public void processMessage(KafkaBaseDto message) {
+        log.info("polled records.counter:{}", message.getKafkaMessageId());
+        try {
+            if (message instanceof KafkaMessageDto) {
+
+                if (!message.getClusterId().equals(groupId)) {
+                    ChannelMessageDto channelMessageDto = messageMapper.KafkaMessageDtoToChannelMessageDto((KafkaMessageDto) message);
                     messageService.processMessage(channelMessageDto);
-                    channelRepository.applyToRoom(channelMessageDto.getRoomId(), channelMessageDto::writeAndFlush);
+                    channelRepository.sendToRoom(channelMessageDto.getRoomId(), channelMessageDto);
                 }
-                log.info("key:{}, value:{}, record:{}", key, value, kafkaRecord);
-            } catch (Exception ex) {
-                log.error("can't parse record:{}", kafkaRecord, ex);
+            } else if (message instanceof KafkaRoomDto) {
+                if (!message.getClusterId().equals(groupId)) {
+                    ChannelRoomDto channelRoomDto = roomMapper.KafkaRoomDtoToChannelRoomDto((KafkaRoomDto) message);
+                    roomService.processMessage(channelRoomDto);
+                    channelRepository.sendToAllRoom(channelRoomDto);
+                }
             }
+            log.info("receive value:{}", message.toJson());
+        } catch (Exception ex) {
+            log.error("can't parse record:{}", message, ex);
         }
-    }
-
-    private void roomPoll() {
-        log.info("poll records");
-        ConsumerRecords<UUID, KafkaBaseDto> records = roomConsumer.getKafkaConsumer().poll(timeout);
-        //       sleep();
-        log.info("polled records.counter:{}", records.count());
-        for (ConsumerRecord<UUID, KafkaBaseDto> kafkaRecord : records) {
-            try {
-                var key = kafkaRecord.key();
-                var value = kafkaRecord.value();
-                log.info("key:{}, value:{}, record:{}", key, value, kafkaRecord);
-                //dataConsumer.accept(value);
-            } catch (Exception ex) {
-                log.error("can't parse record:{}", kafkaRecord, ex);
-            }
-        }
-    }
-
-    private void clientPoll() {
-        log.info("poll records");
-        ConsumerRecords<UUID, KafkaBaseDto> records = clientConsumer.getKafkaConsumer().poll(timeout);
-        //       sleep();
-        log.info("polled records.counter:{}", records.count());
-        for (ConsumerRecord<UUID, KafkaBaseDto> kafkaRecord : records) {
-            try {
-                var key = kafkaRecord.key();
-                var value = kafkaRecord.value();
-                log.info("key:{}, value:{}, record:{}", key, value, kafkaRecord);
-                //dataConsumer.accept(value);
-            } catch (Exception ex) {
-                log.error("can't parse record:{}", kafkaRecord, ex);
-            }
-        }
-    }
-    @PreDestroy
-    public void stopConsuming() {
-        log.info("Stop receiving data from topics");
-        executorMessages.shutdown();
-        executorRooms.shutdown();
-        executorClients.shutdown();
     }
 }

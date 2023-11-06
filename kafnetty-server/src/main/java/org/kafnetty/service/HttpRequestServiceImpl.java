@@ -7,6 +7,7 @@ import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.QueryStringDecoder;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
+import lombok.RequiredArgsConstructor;
 import org.kafnetty.dto.channel.ChannelErrorDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,7 +23,7 @@ import static io.netty.handler.codec.http.HttpResponseStatus.*;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 @Component
-//@RequiredArgsConstructor
+@RequiredArgsConstructor
 public class HttpRequestServiceImpl implements HttpRequestService {
     @Autowired
     private ChatService chatService;
@@ -32,8 +33,7 @@ public class HttpRequestServiceImpl implements HttpRequestService {
     private String staticPath;
     @Value("${server.chat-path}")
     private String chatPath;
-    @Autowired
-    private HttpResponseProcessor httpResponseProcessor;
+    private final HttpResponseProcessor httpResponseProcessor;
 
     @Override
     public void processWebSocketRequest(Channel channel, WebSocketFrame frame) {

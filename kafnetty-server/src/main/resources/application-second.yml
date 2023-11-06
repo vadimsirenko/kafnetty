@@ -3,12 +3,6 @@ server:
   web-socket-path: "/websocket"
   static-path: "/static"
   chat-path: "/chat.html"
-  cluster-id: "kafnetty-2"
-  kafka:
-    message-topic: "kafnetty-messages"
-    room-topic: "kafnetty-rooms"
-    client-topic: "kafnetty-clients"
-    servers: "localhost:9092"
   boss:
     thread:
       count: 2
@@ -32,6 +26,25 @@ spring:
       ddl-auto: validate
   main:
     allow-circular-references: true
+  kafka:
+    topic:
+      name: KAFNETTY
+    group-id: kafnetty-2
+    producer:
+      bootstrap-servers: localhost:9092
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    consumer:
+      bootstrap-servers: localhost:9092
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      #value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      properties:
+        spring:
+          json:
+            trusted:
+              packages: 'org.kafnetty.dto.kafka'
 logging:
   level:
     org:

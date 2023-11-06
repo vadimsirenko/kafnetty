@@ -212,20 +212,24 @@
             }
         },
         processMessage: function (message) {
-            this.messagesLength = this.messagesLength + 1;
-            this.updateTitleChat();
-            this.$chatHistoryList.append(this.renderedMessage(message));
-            this.scrollToBottom();
+            if (!this.$chatHistoryList.find('[message-id=' + message.id + ']').length) {
+                this.messagesLength = this.messagesLength + 1;
+                this.updateTitleChat();
+                this.$chatHistoryList.append(this.renderedMessage(message));
+                this.scrollToBottom();
+            }
         },
         processRoom: function (room) {
-            let templateRoom = Handlebars.compile($("#room-item-template").html());
-            let contextResponse = {
-                name: room.name,
-                id: room.id
-            };
-            this.$roomSetList.append(templateRoom(contextResponse));
-            searchRoomFilter.init();
-            this.coloredChatList();
+            if (!this.$roomSetList.find('.chat-item[data-id=' + room.id + ']').length) {
+                let templateRoom = Handlebars.compile($("#room-item-template").html());
+                let contextResponse = {
+                    name: room.name,
+                    id: room.id
+                };
+                this.$roomSetList.append(templateRoom(contextResponse));
+                searchRoomFilter.init();
+                this.coloredChatList();
+            }
         },
         processInfo: function (info) {
             this.$chatHistoryList.append(this.renderedInfoMessage(info));
@@ -237,6 +241,7 @@
                 templateResponse = Handlebars.compile($("#message-template").html());
             }
             let contextResponse = {
+                id: message.id,
                 login: message.sender,
                 messageText: message.messageText,
                 time: this.getFormattedTime(new Date(message.ts))

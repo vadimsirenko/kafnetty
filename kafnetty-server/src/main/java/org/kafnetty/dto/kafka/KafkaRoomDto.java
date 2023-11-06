@@ -1,4 +1,4 @@
-package org.kafnetty.dto.channel;
+package org.kafnetty.dto.kafka;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -7,21 +7,21 @@ import org.kafnetty.type.OPERATION_TYPE;
 
 import java.util.UUID;
 
-@Getter
 @Setter
-public class ChannelRoomDto extends ChannelBaseDto {
+@Getter
+public class KafkaRoomDto extends KafkaBaseDto {
     private UUID id;
     private String name;
     private long messageCount;
     private String clusterId;
 
-    public ChannelRoomDto(OPERATION_TYPE operationType, UUID id, String name) {
+    public KafkaRoomDto(OPERATION_TYPE operationType, UUID id, String name) {
         super(MESSAGE_TYPE.ROOM, operationType);
         this.id = id;
         this.name = name;
     }
 
-    public ChannelRoomDto() {
-        super(MESSAGE_TYPE.ROOM, OPERATION_TYPE.UPDATE);
+    public KafkaRoomDto() {
+        super(MESSAGE_TYPE.ROOM, OPERATION_TYPE.CREATE);
     }
 }

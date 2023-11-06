@@ -8,17 +8,9 @@ version = '1.0'
 repositories {
     mavenCentral()
 }
-
-dependencies {
-    annotationProcessor('org.projectlombok:lombok:1.18.30')
-    annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
-}
-task getFlatDependencies(type: Copy) {
-    into 'build/libs'
-    from {
-        subprojects.findAll { it.getSubprojects().isEmpty() }.
-                collect { it.configurations.compileClasspath }
-    }
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs << '-Xlint:unchecked'
+    options.deprecation = true
 }
 test {
     useJUnitPlatform()

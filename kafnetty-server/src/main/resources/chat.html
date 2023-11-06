@@ -80,7 +80,7 @@
 </script>
 
 <script id="message-response-template" type="text/x-handlebars-template">
-    <li class="clearfix">
+    <li class="clearfix" message-id="{{id}}">
         <div class="message-data align-right">
             <span class="message-data-time">{{time}}</span> &nbsp; &nbsp;
             <span class="message-data-name">{{login}}</span> <i class="kn kn-circle me"></i>
@@ -92,7 +92,7 @@
 </script>
 
 <script id="message-template" type="text/x-handlebars-template">
-    <li>
+    <li message-id="{{id}}">
         <div class="message-data">
             <span class="message-data-name"><i class="kn kn-circle online"></i> {{login}}</span>
             <span class="message-data-time">{{time}}</span>
@@ -138,8 +138,8 @@
     <h2>Введте наименование нового чата</h2>
     <input type="text" name="create-room-name" id="create-room-name">
     <div class="action-buttons">
-        <a href="#cancel" id="create-room-ok" class="button15" >Сохранить</a>
-        <a href="#cancel" id="create-room-cancel" class="button15" >Отменить</a>
+        <a href="#cancel" id="create-room-ok" class="button15">Сохранить</a>
+        <a href="#cancel" id="create-room-cancel" class="button15">Отменить</a>
     </div>
 </div>
 

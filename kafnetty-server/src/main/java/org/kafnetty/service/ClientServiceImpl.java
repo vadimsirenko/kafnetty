@@ -1,6 +1,7 @@
 package org.kafnetty.service;
 
 import io.netty.channel.Channel;
+import lombok.RequiredArgsConstructor;
 import org.kafnetty.dto.UserProfileDto;
 import org.kafnetty.dto.channel.ChannelBaseDto;
 import org.kafnetty.dto.channel.ChannelClientDto;
@@ -8,7 +9,6 @@ import org.kafnetty.entity.Client;
 import org.kafnetty.mapper.ClientMapper;
 import org.kafnetty.mapper.UserProfileDtoMapper;
 import org.kafnetty.repository.ClientRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -16,15 +16,16 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
+@RequiredArgsConstructor
 public class ClientServiceImpl implements ClientService {
 
     private static final Map<String, UserProfileDto> USER_PROFILES = new ConcurrentHashMap<>();
-    @Autowired
-    private ClientRepository clientRepository;
-    @Autowired
-    private UserProfileDtoMapper userProfileDtoMapper;
-    @Autowired
-    private ClientMapper clientMapper;
+
+    private final ClientRepository clientRepository;
+
+    private final UserProfileDtoMapper userProfileDtoMapper;
+
+    private final ClientMapper clientMapper;
 
     private static boolean checkToken(ChannelClientDto req) {
         return true;
@@ -37,10 +38,12 @@ public class ClientServiceImpl implements ClientService {
         }
         return null;
     }
+
     @Override
     public boolean existsUserProfile(String channelLongId) {
         return USER_PROFILES.containsKey(channelLongId);
     }
+
     @Override
     public void setRoomForUserProfile(UUID roomId, String channelLongId) {
         if (USER_PROFILES.containsKey(channelLongId)) {
@@ -49,12 +52,14 @@ public class ClientServiceImpl implements ClientService {
             USER_PROFILES.put(channelLongId, userProfileDto);
         }
     }
+
     @Override
     public void removeProfile(String channelLongId) {
         if (USER_PROFILES.containsKey(channelLongId)) {
             USER_PROFILES.remove(channelLongId);
         }
     }
+
     @Override
     public ChannelClientDto processMessage(ChannelBaseDto message, Channel channel) {
         ChannelClientDto clientDto = (ChannelClientDto) message;

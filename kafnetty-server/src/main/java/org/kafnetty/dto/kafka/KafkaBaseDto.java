@@ -25,6 +25,14 @@ import java.util.UUID;
         @JsonSubTypes.Type(value = KafkaMessageDto.class, name = "MESSAGE")
 })
 public abstract class KafkaBaseDto<T extends KafkaBaseDto> {
+    public static final String KAFNETTY_TOPIC = "KAFNETTY";
+
+    public static final int KAFNETTY_TOPIC_PARTITION = 3;
+
+    public static final String KAFNETTY_EVENT_HANDLER_GROUP_ID = "KAFNETTY-HANDLER";
+
+    public static final String KAFNETTY_STATUS_GROUP_ID_PREFIX = "KAFNETTY-STATUS-";
+
     private static ObjectMapper MAPPER = new ObjectMapper();
     private MESSAGE_TYPE messageType;
     private UUID kafkaMessageId = UUID.randomUUID();

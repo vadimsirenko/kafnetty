@@ -2,16 +2,21 @@ package org.kafnetty.repository;
 
 import io.netty.channel.Channel;
 import io.netty.channel.group.ChannelGroup;
+import org.kafnetty.dto.channel.ChannelBaseDto;
 
 import java.util.UUID;
 
 public interface ChannelRepository {
-    interface RoomEventCallback {
+    interface SingleGroupEventCallback {
         void run(ChannelGroup group);
     }
-    void changeRoom(UUID roomId, UUID roomIdOld, Channel channel, RoomEventCallback removeCallback, RoomEventCallback addCallback);
 
-    void removeChannelFromRoom(UUID roomId, Channel channel, RoomEventCallback removeCallback);
+    void changeRoom(UUID roomId, UUID roomIdOld, Channel channel, SingleGroupEventCallback removeCallback, SingleGroupEventCallback addCallback);
 
-    void applyToRoom(UUID roomId, RoomEventCallback applyCallback);
+    void removeChannelFromRoom(UUID roomId, Channel channel, SingleGroupEventCallback removeCallback);
+
+    void sendToRoom(UUID roomId, ChannelBaseDto channelRoomDto);
+
+    void sendToAllRoom(ChannelBaseDto channelRoomDto);
+
 }

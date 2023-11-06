@@ -5,13 +5,13 @@ VALUES ('a5461723-b1de-4351-a2f0-94bc2e1a2f92', 'vadim', 'Вадим', 'vadim@ma
        ('92aeaf7c-39e3-49a7-b69a-18de73efb479', 'oleg', 'Олег', 'oleg@mail.ru', '1234567');
 
 TRUNCATE TABLE room;
-INSERT INTO room(id, name)
-VALUES ('2bd09cbf-ef16-469f-82ab-f51ae9913aa0', 'Первый чат'),
-       ('643c0714-a948-42c3-946a-a4818896a219', 'Второй чат'),
-       ('54a72323-1be5-460e-a4c4-43f2cb227a1f', 'Третий чат');
+INSERT INTO room(id, cluster_id, name, is_sent)
+VALUES ('2bd09cbf-ef16-469f-82ab-f51ae9913aa0', 'test-1', 'Первый чат', false),
+       ('643c0714-a948-42c3-946a-a4818896a219', 'test-1', 'Второй чат', false),
+       ('54a72323-1be5-460e-a4c4-43f2cb227a1f', 'kafnetty-1', 'Третий чат', false);
 
 TRUNCATE TABLE message;
-INSERT INTO message(id, cluster_id,sender_id, sender, room_id, message_text, ts, is_sent)
+INSERT INTO message(id, cluster_id, sender_id, sender, room_id, message_text, ts, is_sent)
 VALUES ('fd2d7cc1-5ac9-40e9-b4f7-fc518eedd095', 'test-1', 'a5461723-b1de-4351-a2f0-94bc2e1a2f92', 'Вадим',
         '2bd09cbf-ef16-469f-82ab-f51ae9913aa0',
         'Our use case is simple, the server will simply transform the request body and query parameters, if any, to uppercase. A word of caution here on reflecting request data in the response – we are doing this only for demonstration purposes, to understand how we can use Netty to implement an HTTP server.',
