@@ -1,8 +1,8 @@
 TRUNCATE TABLE client;
-INSERT INTO client(id, login, nick_name, email, token)
-VALUES ('a5461723-b1de-4351-a2f0-94bc2e1a2f92', 'vadim', 'Вадим', 'vadim@mail.ru', '1234567'),
-       ('f9b26b13-6a8e-41e0-9332-9b14eaa6d60a', 'sergey', 'Сергей', 'sergey@mail.ru', '1234567'),
-       ('92aeaf7c-39e3-49a7-b69a-18de73efb479', 'oleg', 'Олег', 'oleg@mail.ru', '1234567');
+INSERT INTO client(id, cluster_id, login, nick_name, email, token, is_sent)
+VALUES ('a5461723-b1de-4351-a2f0-94bc2e1a2f92', 'test-1', 'vadim', 'Вадим', 'vadim@mail.ru', '1234567', true),
+       ('f9b26b13-6a8e-41e0-9332-9b14eaa6d60a', 'test-1', 'sergey', 'Сергей', 'sergey@mail.ru', '1234567', true),
+       ('92aeaf7c-39e3-49a7-b69a-18de73efb479', 'kafnetty-1','oleg', 'Олег', 'oleg@mail.ru', '1234567', false);
 
 TRUNCATE TABLE room;
 INSERT INTO room(id, cluster_id, name, is_sent)

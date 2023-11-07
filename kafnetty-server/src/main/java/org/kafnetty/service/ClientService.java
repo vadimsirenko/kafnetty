@@ -16,7 +16,8 @@ public interface ClientService {
 
     void removeProfile(String channelLongId);
 
-    ChannelClientDto processMessage(ChannelBaseDto message, Channel channel);
+    ChannelClientDto processLocalMessage(ChannelClientDto message, Channel channel);
+    ChannelClientDto processMessage(ChannelClientDto message, Channel channel);
 }
 
 

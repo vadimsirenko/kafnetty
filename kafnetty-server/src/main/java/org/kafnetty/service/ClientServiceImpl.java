@@ -3,16 +3,21 @@ package org.kafnetty.service;
 import io.netty.channel.Channel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.producer.KafkaProducer;
 import org.kafnetty.dto.UserProfileDto;
 import org.kafnetty.dto.channel.ChannelBaseDto;
 import org.kafnetty.dto.channel.ChannelClientDto;
+import org.kafnetty.dto.channel.ChannelMessageDto;
 import org.kafnetty.entity.Client;
+import org.kafnetty.kafka.producer.KafnettyProducer;
 import org.kafnetty.mapper.ClientMapper;
 import org.kafnetty.mapper.UserProfileDtoMapper;
 import org.kafnetty.repository.ClientRepository;
 import org.kafnetty.type.OPERATION_TYPE;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -25,7 +30,7 @@ public class ClientServiceImpl implements ClientService {
     private final ClientRepository clientRepository;
     private final UserProfileDtoMapper userProfileDtoMapper;
     private final ClientMapper clientMapper;
-
+    private final KafnettyProducer kafkaProducer;
     private static boolean checkToken(ChannelClientDto req) {
         return true;
     }
@@ -58,37 +63,47 @@ public class ClientServiceImpl implements ClientService {
             USER_PROFILES.remove(channelLongId);
         }
     }
-
     @Override
-    public ChannelClientDto processMessage(ChannelBaseDto message, Channel channel) {
-        ChannelClientDto clientDto = (ChannelClientDto) message;
-        if (clientDto.getRoomId() == null) {
+    public ChannelClientDto processLocalMessage(ChannelClientDto message, Channel channel) {
+        message.setClusterId(kafkaProducer.getGroupId());
+        return processMessage(message, channel);
+    }
+    @Override
+    public ChannelClientDto processMessage(ChannelClientDto message, Channel channel) {
+         if (message.getRoomId() == null) {
             throw new RuntimeException("User is not authorized");
         }
-        if (!checkToken((ChannelClientDto) clientDto)) {
+        if (!checkToken(message)) {
             // TODO обработать неверный вход
             throw new RuntimeException("User is not authorized");
         }
         Client client;
-        if (clientDto.getOperationType() == OPERATION_TYPE.LOGON) {
-            client = clientRepository.findByLogin(clientDto.getLogin()).orElse(null);
+        if (message.getOperationType() == OPERATION_TYPE.LOGON) {
+            client = clientRepository.findByLogin(message.getLogin()).orElse(null);
             if (client == null) {
                 // TODO обработать неверный вход
                 throw new RuntimeException("User is not authorized");
             }
         } else {
-            client = clientRepository.findById(clientDto.getId()).orElse(null);
+            client = clientRepository.findById(message.getId()).orElse(null);
             if (client == null) {
                 // TODO обработать неверный вход
                 throw new RuntimeException("User is not authorized");
             }
-            client.setNickName(clientDto.getNickName());
-            client.setEmail(clientDto.getEmail());
+            client.setLogin(message.getLogin());
+            client.setNickName(message.getNickName());
+            client.setEmail(message.getEmail());
+            client.setEmail(message.getEmail());
+            client.setTs(new Date().getTime());
             client = clientRepository.saveAndFlush(client);
         }
-        client.setRoomId(clientDto.getRoomId());
-        USER_PROFILES.put(channel.id().asLongText(), userProfileDtoMapper.ClientToUserProfileDto(client));
-        return clientMapper.ClientToChannelClientDto(client);
+        client.setRoomId(message.getRoomId());
+        if(channel!=null) {
+            USER_PROFILES.put(channel.id().asLongText(), userProfileDtoMapper.ClientToUserProfileDto(client));
+        }
+        ChannelClientDto result = clientMapper.ClientToChannelClientDto(client);
+        result.setOperationType(message.getOperationType());
+        return result;
     }
 }
 

@@ -2,7 +2,9 @@ package org.kafnetty.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.KafkaClient;
 import org.kafnetty.dto.kafka.KafkaBaseDto;
+import org.kafnetty.dto.kafka.KafkaClientDto;
 import org.kafnetty.dto.kafka.KafkaMessageDto;
 import org.kafnetty.dto.kafka.KafkaRoomDto;
 import org.kafnetty.kafka.producer.KafnettyProducer;
@@ -22,7 +24,7 @@ public class KafkaProducerServiceImpl implements KafkaProducerService {
     @Override
     public void sendMessage(KafkaMessageDto kafkaMessageDto, KafkaProducerCallback kafkaProducerCallback) {
         kafkaMessageDto.setClusterId(kafkaProducer.getGroupId());
-        log.info("value {}: {}", kafkaMessageDto.getMessageType(), kafkaMessageDto.toJson());
+        log.info("sendMessage {}: {}", kafkaMessageDto.getMessageType(), kafkaMessageDto.toJson());
         try {
             if (kafkaProducer.create(kafkaMessageDto)) {
                 kafkaProducerCallback.run(kafkaMessageDto);
@@ -31,14 +33,25 @@ public class KafkaProducerServiceImpl implements KafkaProducerService {
             log.error(ex.getMessage(), ex);
         }
     }
-
     @Override
     public void sendRoom(KafkaRoomDto kafkaRoomDto, KafkaProducerCallback kafkaProducerCallback) {
         kafkaRoomDto.setClusterId(kafkaProducer.getGroupId());
-        log.info("value {}: {}", kafkaRoomDto.getMessageType(), kafkaRoomDto.toJson());
+        log.info("sendRoom {}: {}", kafkaRoomDto.getMessageType(), kafkaRoomDto.toJson());
         try {
             if (kafkaProducer.create(kafkaRoomDto)) {
                 kafkaProducerCallback.run(kafkaRoomDto);
+            }
+        } catch (Exception ex) {
+            log.error(ex.getMessage(), ex);
+        }
+    }
+    @Override
+    public void sendClient(KafkaClientDto kafkaClientDto, KafkaProducerCallback kafkaProducerCallback) {
+        kafkaClientDto.setClusterId(kafkaProducer.getGroupId());
+        log.info("sendClient {}: {}", kafkaClientDto.getMessageType(), kafkaClientDto.toJson());
+        try {
+            if (kafkaProducer.create(kafkaClientDto)) {
+                kafkaProducerCallback.run(kafkaClientDto);
             }
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);

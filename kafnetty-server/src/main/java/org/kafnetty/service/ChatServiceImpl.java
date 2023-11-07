@@ -7,11 +7,12 @@ import org.kafnetty.dto.UserProfileDto;
 import org.kafnetty.dto.channel.*;
 import org.kafnetty.dto.kafka.KafkaMessageDto;
 import org.kafnetty.dto.kafka.KafkaRoomDto;
+import org.kafnetty.mapper.ClientMapper;
 import org.kafnetty.mapper.MessageMapper;
 import org.kafnetty.mapper.RoomMapper;
 import org.kafnetty.mapper.UserProfileDtoMapper;
 import org.kafnetty.repository.ChannelRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.kafnetty.type.OPERATION_TYPE;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -25,14 +26,10 @@ public class ChatServiceImpl implements ChatService {
     private final RoomService roomService;
     private final KafkaProducerService kafkaProducerService;
     private final ChannelRepository channelRepository;
-
-    //private final Map<UUID, ChannelGroup> CHANNEL_GROUP_MAP = new ConcurrentHashMap<>();
-    @Autowired
-    private UserProfileDtoMapper userProfileDtoMapper;
-    @Autowired
-    private MessageMapper messageMapper;
-    @Autowired
-    private RoomMapper roomMapper;
+    private final UserProfileDtoMapper userProfileDtoMapper;
+    private final MessageMapper messageMapper;
+    private final RoomMapper roomMapper;
+    private final ClientMapper clientMapper;
 
     @Override
     public void putChannel(UUID roomId, Channel channel) {
@@ -82,8 +79,13 @@ public class ChatServiceImpl implements ChatService {
                 channelMessageListDto.writeAndFlush(channel);
                 break;
             case CLIENT:
-                ChannelClientDto channelClientDto = clientService.processMessage(messageDto, channel);
+                ChannelClientDto channelClientDto = clientService.processLocalMessage((ChannelClientDto) messageDto, channel);
                 putChannel(channelClientDto.getRoomId(), channel);
+                if (channelClientDto.getOperationType() == OPERATION_TYPE.UPDATE ||
+                        channelClientDto.getOperationType() == OPERATION_TYPE.CREATE) {
+                    kafkaProducerService.sendClient(clientMapper.ChannelClientDtoToKafkaMessageDto(channelClientDto),
+                            kafkaDto -> {});
+                }
                 channelClientDto.writeAndFlush(channel);
                 break;
             default:

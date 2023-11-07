@@ -241,6 +241,7 @@
                     "operationType": "UPDATE",
                     "email": email,
                     "nickName": nikname,
+                    "login": this.login,
                     "roomId": this.roomId,
                     "ts": new Date().getTime()
                 };
@@ -263,6 +264,7 @@
             this.senderId = data.id;
             this.nickName = data.nickName;
             this.email = data.email;
+            this.login = data.login;
             if (data.roomId != null) {
                 this.roomId = data.roomId;
                 this.coloredChatList();
