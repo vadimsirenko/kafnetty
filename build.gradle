@@ -8,10 +8,6 @@ version = '1.0'
 repositories {
     mavenCentral()
 }
-tasks.withType(JavaCompile).configureEach {
-    options.compilerArgs << '-Xlint:unchecked'
-    options.deprecation = true
-}
 test {
     useJUnitPlatform()
 }

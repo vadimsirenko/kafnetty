@@ -8,6 +8,7 @@ import io.netty.handler.codec.http.QueryStringDecoder;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.kafnetty.dto.channel.ChannelErrorDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,6 +25,7 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class HttpRequestServiceImpl implements HttpRequestService {
     @Autowired
     private ChatService chatService;
@@ -44,10 +46,9 @@ public class HttpRequestServiceImpl implements HttpRequestService {
                 chatService.processMessage(((TextWebSocketFrame) frame).text(), channel);
             }
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            log.error("error at process WebSocket request", e);
         }
     }
-
     @Override
     public boolean processHttpRequest(ChannelHandlerContext ctx, HttpRequest request) {
         try {
@@ -87,7 +88,7 @@ public class HttpRequestServiceImpl implements HttpRequestService {
             return true;
         } catch (RuntimeException ex) {
             httpResponseProcessor.sendHttpResponse(ctx, request, new DefaultFullHttpResponse(HTTP_1_1, NOT_FOUND));
-            ex.printStackTrace();
+            log.error("error at process Http request", ex);
             return false;
         }
     }

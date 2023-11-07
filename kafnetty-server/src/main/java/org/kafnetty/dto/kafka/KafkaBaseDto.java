@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import org.kafnetty.dto.channel.*;
 import org.kafnetty.type.MESSAGE_TYPE;
 import org.kafnetty.type.OPERATION_TYPE;
 
@@ -22,17 +23,11 @@ import java.util.UUID;
         include = JsonTypeInfo.As.PROPERTY,
         property = "messageType")
 @JsonSubTypes({
-        @JsonSubTypes.Type(value = KafkaMessageDto.class, name = "MESSAGE")
+        @JsonSubTypes.Type(value = KafkaMessageDto.class, name = "MESSAGE"),
+        @JsonSubTypes.Type(value = KafkaClientDto.class, name = "CLIENT"),
+        @JsonSubTypes.Type(value = KafkaRoomDto.class, name = "ROOM")
 })
 public abstract class KafkaBaseDto<T extends KafkaBaseDto> {
-    public static final String KAFNETTY_TOPIC = "KAFNETTY";
-
-    public static final int KAFNETTY_TOPIC_PARTITION = 3;
-
-    public static final String KAFNETTY_EVENT_HANDLER_GROUP_ID = "KAFNETTY-HANDLER";
-
-    public static final String KAFNETTY_STATUS_GROUP_ID_PREFIX = "KAFNETTY-STATUS-";
-
     private static ObjectMapper MAPPER = new ObjectMapper();
     private MESSAGE_TYPE messageType;
     private UUID kafkaMessageId = UUID.randomUUID();

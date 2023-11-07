@@ -1,7 +1,10 @@
 package org.kafnetty.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.KafkaClient;
 import org.kafnetty.dto.kafka.KafkaBaseDto;
+import org.kafnetty.dto.kafka.KafkaClientDto;
 import org.kafnetty.dto.kafka.KafkaMessageDto;
 import org.kafnetty.dto.kafka.KafkaRoomDto;
 import org.kafnetty.kafka.producer.KafnettyProducer;
@@ -13,56 +16,43 @@ import java.util.function.Consumer;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class KafkaProducerServiceImpl implements KafkaProducerService {
-    private static final Logger log = LoggerFactory.getLogger(KafkaProducerServiceImpl.class);
     private final KafnettyProducer kafkaProducer;
-
     private final Consumer<KafkaBaseDto> sendAsk =
             message -> log.info("asked, value {}:{}", message.getMessageType(), message.getKafkaMessageId());
-
     @Override
     public void sendMessage(KafkaMessageDto kafkaMessageDto, KafkaProducerCallback kafkaProducerCallback) {
         kafkaMessageDto.setClusterId(kafkaProducer.getGroupId());
-        log.info("value {}: {}", kafkaMessageDto.getMessageType(), kafkaMessageDto.toJson());
+        log.info("sendMessage {}: {}", kafkaMessageDto.getMessageType(), kafkaMessageDto.toJson());
         try {
             if (kafkaProducer.create(kafkaMessageDto)) {
                 kafkaProducerCallback.run(kafkaMessageDto);
             }
-            /*
-            kafkaProducer.getKafkaProducer().send(new ProducerRecord<>(kafkaProducer.MESSAGE_TOPIC_NAME, kafkaMessageDto.getKafkaMessageId(), kafkaMessageDto),
-                    (metadata, exception) -> {
-                        if (exception != null) {
-                            log.error("message wasn't sent", exception);
-                        } else {
-                            log.info("message id:{} was sent, offset:{}", kafkaMessageDto.getKafkaMessageId(), metadata.offset());
-                            kafkaProducerCallback.run(kafkaMessageDto);
-                        }
-                    });
-
-             */
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
         }
     }
-
     @Override
     public void sendRoom(KafkaRoomDto kafkaRoomDto, KafkaProducerCallback kafkaProducerCallback) {
         kafkaRoomDto.setClusterId(kafkaProducer.getGroupId());
-        log.info("value {}: {}", kafkaRoomDto.getMessageType(), kafkaRoomDto.toJson());
+        log.info("sendRoom {}: {}", kafkaRoomDto.getMessageType(), kafkaRoomDto.toJson());
         try {
             if (kafkaProducer.create(kafkaRoomDto)) {
                 kafkaProducerCallback.run(kafkaRoomDto);
             }
-            /*
-            kafkaProducer.getKafkaProducer().send(new ProducerRecord<>(kafkaProducer.ROOM_TOPIC_NAME, kafkaRoomDto.getKafkaMessageId(), kafkaRoomDto),
-                    (metadata, exception) -> {
-                        if (exception != null) {
-                            log.error("message wasn't sent", exception);
-                        } else {
-                            log.info("message id:{} was sent, offset:{}", kafkaRoomDto.getKafkaMessageId(), metadata.offset());
-                            kafkaProducerCallback.run(kafkaRoomDto);
-                        }
-                    });*/
+        } catch (Exception ex) {
+            log.error(ex.getMessage(), ex);
+        }
+    }
+    @Override
+    public void sendClient(KafkaClientDto kafkaClientDto, KafkaProducerCallback kafkaProducerCallback) {
+        kafkaClientDto.setClusterId(kafkaProducer.getGroupId());
+        log.info("sendClient {}: {}", kafkaClientDto.getMessageType(), kafkaClientDto.toJson());
+        try {
+            if (kafkaProducer.create(kafkaClientDto)) {
+                kafkaProducerCallback.run(kafkaClientDto);
+            }
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
         }

@@ -13,6 +13,8 @@ import java.util.UUID;
 public class Client {
     @Id
     private UUID id;
+    @Column(name = "cluster_id", nullable = false)
+    private String clusterId;
     @Column(name = "login", nullable = false)
     private String login;
     private String email;
@@ -21,4 +23,7 @@ public class Client {
     private String token;
     @Transient
     private UUID roomId;
+    private Long ts;
+    @Column(name = "is_sent")
+    private boolean isSent = false;
 }

@@ -109,7 +109,6 @@ body {
     /*float: left;*/
     padding-left: 20px;
     margin-top: 6px;
-
     display: inline-block;
 }
 
@@ -121,7 +120,12 @@ body {
 .chat .chat-header .chat-num-messages {
     color: #92959E;
 }
-
+.chat-header .kn-exit, .chat-header .kn-cog{
+    font-size: 18px;
+    display: inline-block;
+    margin-top: 6px;
+    vertical-align: top;
+}
 .chat .chat-history {
     padding: 30px 30px 20px;
     border-bottom: 2px solid white;
@@ -278,7 +282,7 @@ body {
     align-content: center;
 }
 
-.create-room {
+.modal-form {
     position: absolute;
     z-index: 101;
     display: none;
@@ -296,29 +300,34 @@ body {
                                             translateX(-50%) and translateY(-50%) */
 }
 
-.create-room h2 {
+.modal-form h2 {
     font-size: 16px;
+    font-weight: bold;
     align-content: center;
     text-align: center;
-    margin: 20px;
+    margin: 10px 20px 20px 20px;
+    color: lightgrey;
 }
 
-.create-room .validate-error {
+.modal-form .validate-error {
     margin-top: 5px;
     margin-left: 20px;
-    text-align: center;
-    color: #ff9292;
-    /* display: inline-block; */
+    text-align: left;
     display: none;
+    color: lightgrey;
 }
 
-.create-room #create-room-name {
+.modal-form .field-name {
     align-content: center;
     width: 70%;
     margin: 0px 50px 0px 50px;
     border-radius: 3px;
     border: none;
     border-width: 0px;
+    padding: 5px;
+}
+.modal-form .field-title{
+    margin: 0px 50px 0px 50px;
     padding: 5px;
 }
 
@@ -356,6 +365,10 @@ a.button15:active {
     box-shadow: 0 1px 2px rgba(0, 0, 0, .1) inset;
 }
 
-.create-room .action-buttons {
+.modal-form .action-buttons {
     padding-left: 140px;
+}
+.chat-about{
+    width:370px;
+    display: inline-block;
 }
