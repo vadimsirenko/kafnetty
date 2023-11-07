@@ -8,6 +8,8 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.factory.Mappers;
 
+import java.util.List;
+
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface ClientMapper {
     ClientMapper INSTANCE = Mappers.getMapper(ClientMapper.class);
@@ -18,6 +20,7 @@ public interface ClientMapper {
 
     @Mapping(ignore = true, target = "sent")
     Client ChannelClientDtoToClient(ChannelClientDto clientDto);
+    List<ChannelClientDto> mapToChannelClientDtoList(List<Client> clients);
 
     @Mapping(ignore = true, target = "kafkaMessageId")
     @Mapping(ignore = true, target = "clusterId")

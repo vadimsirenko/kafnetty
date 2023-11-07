@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.kafnetty.dto.channel.ChannelRoomDto;
 import org.kafnetty.dto.channel.ChannelRoomListDto;
+import org.kafnetty.entity.Message;
 import org.kafnetty.entity.Room;
 import org.kafnetty.kafka.config.KafnettyKafkaConfig;
 import org.kafnetty.mapper.RoomMapper;
@@ -12,6 +13,7 @@ import org.kafnetty.repository.RoomRepository;
 import org.kafnetty.type.OPERATION_TYPE;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -55,12 +57,18 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public void setMessageAsSended(ChannelRoomDto channelRoomDto) {
+    public void setRoomAsSended(ChannelRoomDto channelRoomDto) {
         Optional<Room> roomOptional = roomRepository.findById(channelRoomDto.getId());
         if (roomOptional.isPresent()) {
             Room room = roomOptional.get();
             room.setSent(true);
             roomRepository.saveAndFlush(room);
         }
+    }
+
+    @Override
+    public List<ChannelRoomDto> getNotSyncRooms() {
+        List<Room> rooms = roomRepository.findAllByIsSentAndClusterId(false, kafnettyKafkaConfig.getGroupId());
+        return roomMapper.mapToChannelRoomDtoList(rooms);
     }
 }

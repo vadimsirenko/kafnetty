@@ -13,10 +13,7 @@ import org.kafnetty.repository.ClientRepository;
 import org.kafnetty.type.OPERATION_TYPE;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
@@ -57,9 +54,7 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public void removeProfile(String channelLongId) {
-        if (USER_PROFILES.containsKey(channelLongId)) {
-            USER_PROFILES.remove(channelLongId);
-        }
+        USER_PROFILES.remove(channelLongId);
     }
 
     @Override
@@ -70,7 +65,7 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public ChannelClientDto processMessage(ChannelClientDto message, Channel channel) {
-        if (message.getRoomId() == null) {
+        if (message == null) {
             throw new RuntimeException("User is not authorized");
         }
         if (!checkToken(message)) {
@@ -115,6 +110,11 @@ public class ClientServiceImpl implements ClientService {
             client.setSent(true);
             clientRepository.saveAndFlush(client);
         }
+    }
+    @Override
+    public List<ChannelClientDto> getNotSyncClients(){
+        List<Client> clients = clientRepository.findAllByIsSentAndClusterId(false, kafnettyKafkaConfig.getGroupId());
+        return clientMapper.mapToChannelClientDtoList(clients);
     }
 }
 

@@ -72,7 +72,7 @@ public class KafnettyConsumer {
             }
             log.info("receive value:{}", message.toJson());
         } catch (Exception ex) {
-            log.error("can't parse record:{}", message, ex);
+            log.error("can't parse record:{}", message.toJson(), ex);
         }
     }
 }
