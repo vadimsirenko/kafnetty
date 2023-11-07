@@ -49,6 +49,7 @@ public class HttpRequestServiceImpl implements HttpRequestService {
             log.error("error at process WebSocket request", e);
         }
     }
+
     @Override
     public boolean processHttpRequest(ChannelHandlerContext ctx, HttpRequest request) {
         try {

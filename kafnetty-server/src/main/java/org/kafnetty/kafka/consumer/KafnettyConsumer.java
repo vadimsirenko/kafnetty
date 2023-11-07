@@ -17,17 +17,8 @@ import org.kafnetty.service.ClientService;
 import org.kafnetty.service.MessageService;
 import org.kafnetty.service.RoomService;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.kafka.annotation.DltHandler;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.annotation.RetryableTopic;
-import org.springframework.kafka.support.Acknowledgment;
-import org.springframework.kafka.support.converter.ConversionException;
-import org.springframework.kafka.support.serializer.DeserializationException;
-import org.springframework.messaging.converter.MessageConversionException;
-import org.springframework.messaging.handler.invocation.MethodArgumentResolutionException;
-import org.springframework.retry.annotation.Backoff;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @Slf4j
@@ -43,18 +34,19 @@ public class KafnettyConsumer {
     private final RoomService roomService;
     private final ClientService clientService;
     private final ChannelRepository channelRepository;
-/*
-    @RetryableTopic(kafkaTemplate = "kafkaTemplate",
-            exclude = {DeserializationException.class,
-                    MessageConversionException.class,
-                    ConversionException.class,
-                    MethodArgumentResolutionException.class,
-                    NoSuchMethodException.class,
-                    ClassCastException.class},
-            attempts = "4",
-            backoff = @Backoff(delay = 3000, multiplier = 1.5, maxDelay = 15000)
-    )
-    */
+
+    /*
+        @RetryableTopic(kafkaTemplate = "kafkaTemplate",
+                exclude = {DeserializationException.class,
+                        MessageConversionException.class,
+                        ConversionException.class,
+                        MethodArgumentResolutionException.class,
+                        NoSuchMethodException.class,
+                        ClassCastException.class},
+                attempts = "4",
+                backoff = @Backoff(delay = 3000, multiplier = 1.5, maxDelay = 15000)
+        )
+        */
     @KafkaListener(topics = "${spring.kafka.topic.name}", groupId = "${spring.kafka.group-id}")
     public void process(KafkaBaseDto message) {
         log.info("polled records.counter:{}", message.getKafkaMessageId());

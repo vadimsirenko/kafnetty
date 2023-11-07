@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.kafnetty.dto.channel.ChannelRoomDto;
 import org.kafnetty.dto.channel.ChannelRoomListDto;
 import org.kafnetty.entity.Room;
-import org.kafnetty.kafka.producer.KafnettyProducer;
+import org.kafnetty.kafka.config.KafnettyKafkaConfig;
 import org.kafnetty.mapper.RoomMapper;
 import org.kafnetty.repository.RoomRepository;
 import org.kafnetty.type.OPERATION_TYPE;
@@ -19,14 +19,16 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 public class RoomServiceImpl implements RoomService {
-    private final KafnettyProducer kafkaProducer;
+    private final KafnettyKafkaConfig kafnettyKafkaConfig;
     private final RoomRepository roomRepository;
     private final RoomMapper roomMapper;
+
     @Override
     public ChannelRoomDto processLocalMessage(ChannelRoomDto message, Channel channel) {
-        message.setClusterId(kafkaProducer.getGroupId());
+        message.setClusterId(kafnettyKafkaConfig.getGroupId());
         return processMessage(message);
     }
+
     @Override
     public ChannelRoomDto processMessage(ChannelRoomDto roomDto) {
         Room room = roomMapper.ChannelRoomDtoToRoom(roomDto);
@@ -39,16 +41,19 @@ public class RoomServiceImpl implements RoomService {
             existsRoom.setName(roomDto.getName());
             room = roomRepository.saveAndFlush(existsRoom);
         } else {
+            room.setSent(!kafnettyKafkaConfig.getGroupId().equals(roomDto.getClusterId()));
             room = roomRepository.saveAndFlush(room);
         }
         return roomMapper.RoomToChannelRoomDto(room);
     }
+
     @Override
     public ChannelRoomListDto getRoomList(UUID clientId) {
         ChannelRoomListDto roomListDto = new ChannelRoomListDto();
         roomListDto.setRooms(roomRepository.findAll().stream().map(roomMapper::RoomToChannelRoomDto).toList());
         return roomListDto;
     }
+
     @Override
     public void setMessageAsSended(ChannelRoomDto channelRoomDto) {
         Optional<Room> roomOptional = roomRepository.findById(channelRoomDto.getId());

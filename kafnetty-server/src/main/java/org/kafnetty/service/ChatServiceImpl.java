@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.kafnetty.dto.UserProfileDto;
 import org.kafnetty.dto.channel.*;
+import org.kafnetty.dto.kafka.KafkaClientDto;
 import org.kafnetty.dto.kafka.KafkaMessageDto;
 import org.kafnetty.dto.kafka.KafkaRoomDto;
 import org.kafnetty.mapper.ClientMapper;
@@ -84,7 +85,7 @@ public class ChatServiceImpl implements ChatService {
                 if (channelClientDto.getOperationType() == OPERATION_TYPE.UPDATE ||
                         channelClientDto.getOperationType() == OPERATION_TYPE.CREATE) {
                     kafkaProducerService.sendClient(clientMapper.ChannelClientDtoToKafkaMessageDto(channelClientDto),
-                            kafkaDto -> {});
+                            kafkaDto -> clientService.setClientAsSended(clientMapper.KafkaClientDtoToChannelClientDto((KafkaClientDto) kafkaDto)));
                 }
                 channelClientDto.writeAndFlush(channel);
                 break;

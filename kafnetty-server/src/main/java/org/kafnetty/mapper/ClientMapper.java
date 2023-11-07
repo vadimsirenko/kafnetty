@@ -1,9 +1,7 @@
 package org.kafnetty.mapper;
 
 import org.kafnetty.dto.channel.ChannelClientDto;
-import org.kafnetty.dto.channel.ChannelMessageDto;
 import org.kafnetty.dto.kafka.KafkaClientDto;
-import org.kafnetty.dto.kafka.KafkaMessageDto;
 import org.kafnetty.entity.Client;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
