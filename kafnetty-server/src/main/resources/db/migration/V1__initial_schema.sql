@@ -7,13 +7,13 @@ create table room
 );
 create table client
 (
-    id        uuid not null primary key,
+    id         uuid not null primary key,
     cluster_id character varying(30),
-    login     varchar(50),
-    nick_name varchar(30),
-    email     varchar(50),
-    token     varchar(255),
-    ts           bigint,
+    login      varchar(50),
+    nick_name  varchar(30),
+    email      varchar(50),
+    token      varchar(255),
+    ts         bigint,
     is_sent    boolean
 );
 create table message

@@ -8,7 +8,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import org.kafnetty.dto.channel.*;
 import org.kafnetty.type.MESSAGE_TYPE;
 import org.kafnetty.type.OPERATION_TYPE;
 

@@ -3,23 +3,17 @@ package org.kafnetty.service;
 import io.netty.channel.Channel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.clients.producer.KafkaProducer;
 import org.kafnetty.dto.UserProfileDto;
-import org.kafnetty.dto.channel.ChannelBaseDto;
 import org.kafnetty.dto.channel.ChannelClientDto;
-import org.kafnetty.dto.channel.ChannelMessageDto;
 import org.kafnetty.entity.Client;
-import org.kafnetty.kafka.producer.KafnettyProducer;
+import org.kafnetty.kafka.config.KafnettyKafkaConfig;
 import org.kafnetty.mapper.ClientMapper;
 import org.kafnetty.mapper.UserProfileDtoMapper;
 import org.kafnetty.repository.ClientRepository;
 import org.kafnetty.type.OPERATION_TYPE;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
-import java.util.Date;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
@@ -30,7 +24,8 @@ public class ClientServiceImpl implements ClientService {
     private final ClientRepository clientRepository;
     private final UserProfileDtoMapper userProfileDtoMapper;
     private final ClientMapper clientMapper;
-    private final KafnettyProducer kafkaProducer;
+    private final KafnettyKafkaConfig kafnettyKafkaConfig;
+
     private static boolean checkToken(ChannelClientDto req) {
         return true;
     }
@@ -59,18 +54,18 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public void removeProfile(String channelLongId) {
-        if (USER_PROFILES.containsKey(channelLongId)) {
-            USER_PROFILES.remove(channelLongId);
-        }
+        USER_PROFILES.remove(channelLongId);
     }
+
     @Override
     public ChannelClientDto processLocalMessage(ChannelClientDto message, Channel channel) {
-        message.setClusterId(kafkaProducer.getGroupId());
+        message.setClusterId(kafnettyKafkaConfig.getGroupId());
         return processMessage(message, channel);
     }
+
     @Override
     public ChannelClientDto processMessage(ChannelClientDto message, Channel channel) {
-         if (message.getRoomId() == null) {
+        if (message == null) {
             throw new RuntimeException("User is not authorized");
         }
         if (!checkToken(message)) {
@@ -95,15 +90,31 @@ public class ClientServiceImpl implements ClientService {
             client.setEmail(message.getEmail());
             client.setEmail(message.getEmail());
             client.setTs(new Date().getTime());
+            client.setSent(!kafnettyKafkaConfig.getGroupId().equals(message.getClusterId()));
             client = clientRepository.saveAndFlush(client);
         }
         client.setRoomId(message.getRoomId());
-        if(channel!=null) {
+        if (channel != null) {
             USER_PROFILES.put(channel.id().asLongText(), userProfileDtoMapper.ClientToUserProfileDto(client));
         }
         ChannelClientDto result = clientMapper.ClientToChannelClientDto(client);
         result.setOperationType(message.getOperationType());
         return result;
+    }
+
+    @Override
+    public void setClientAsSended(ChannelClientDto channelClientDto) {
+        Optional<Client> clientOptional = clientRepository.findById(channelClientDto.getId());
+        if (clientOptional.isPresent()) {
+            Client client = clientOptional.get();
+            client.setSent(true);
+            clientRepository.saveAndFlush(client);
+        }
+    }
+    @Override
+    public List<ChannelClientDto> getNotSyncClients(){
+        List<Client> clients = clientRepository.findAllByIsSentAndClusterId(false, kafnettyKafkaConfig.getGroupId());
+        return clientMapper.mapToChannelClientDtoList(clients);
     }
 }
 

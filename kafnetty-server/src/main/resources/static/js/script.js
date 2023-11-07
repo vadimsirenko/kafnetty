@@ -187,13 +187,13 @@
             }
         },
         resetUser: function () {
-            this.login=null;
-            this.email=null;
-            this.roomId=null;
-            this.messageToSend='';
-            this.messagesLength=0;
-            this.nickName=null;
-            this.senderId=null;
+            this.login = null;
+            this.email = null;
+            this.roomId = null;
+            this.messageToSend = '';
+            this.messagesLength = 0;
+            this.nickName = null;
+            this.senderId = null;
             if (window.WebSocket && this.socket && this.socket.readyState === WebSocket.OPEN) {
                 this.socket.close();
                 this.socket = null;
@@ -211,20 +211,20 @@
             this.$loginFormShowElements.fadeIn('slow');
         },
         updateProfile: function () {
-           if(this.senderId != null) {
-               this.$profileFormNikname.val(this.nickName);
-               this.$profileFormEmail.val(this.email);
-               this.$profileFormValidate.text('');
-               this.$profileFormValidate.hide();
-               this.$profileFormShowElements.fadeIn('slow');
-           }
-        },
-        updateProfileCancel: function () {
-                this.$profileFormNikname.val('');
-                this.$profileFormEmail.val('');
+            if (this.senderId != null) {
+                this.$profileFormNikname.val(this.nickName);
+                this.$profileFormEmail.val(this.email);
                 this.$profileFormValidate.text('');
                 this.$profileFormValidate.hide();
-                this.$profileFormShowElements.hide();
+                this.$profileFormShowElements.fadeIn('slow');
+            }
+        },
+        updateProfileCancel: function () {
+            this.$profileFormNikname.val('');
+            this.$profileFormEmail.val('');
+            this.$profileFormValidate.text('');
+            this.$profileFormValidate.hide();
+            this.$profileFormShowElements.hide();
         },
         updateProfileOk: function () {
             this.scrollToBottom();

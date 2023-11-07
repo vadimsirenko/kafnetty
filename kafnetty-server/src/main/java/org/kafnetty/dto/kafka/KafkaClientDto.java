@@ -9,7 +9,7 @@ import java.util.UUID;
 
 @Getter
 @Setter
-public class KafkaClientDto extends KafkaBaseDto{
+public class KafkaClientDto extends KafkaBaseDto {
     private UUID id;
     private String login;
     private String email;

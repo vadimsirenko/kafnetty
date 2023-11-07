@@ -1,14 +1,14 @@
 package org.kafnetty.mapper;
 
 import org.kafnetty.dto.channel.ChannelClientDto;
-import org.kafnetty.dto.channel.ChannelMessageDto;
 import org.kafnetty.dto.kafka.KafkaClientDto;
-import org.kafnetty.dto.kafka.KafkaMessageDto;
 import org.kafnetty.entity.Client;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.factory.Mappers;
+
+import java.util.List;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface ClientMapper {
@@ -20,6 +20,7 @@ public interface ClientMapper {
 
     @Mapping(ignore = true, target = "sent")
     Client ChannelClientDtoToClient(ChannelClientDto clientDto);
+    List<ChannelClientDto> mapToChannelClientDtoList(List<Client> clients);
 
     @Mapping(ignore = true, target = "kafkaMessageId")
     @Mapping(ignore = true, target = "clusterId")

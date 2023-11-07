@@ -5,12 +5,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.kafnetty.dto.channel.ChannelMessageDto;
 import org.kafnetty.dto.channel.ChannelMessageListDto;
+import org.kafnetty.entity.Client;
 import org.kafnetty.entity.Message;
-import org.kafnetty.kafka.producer.KafnettyProducer;
+import org.kafnetty.kafka.config.KafnettyKafkaConfig;
 import org.kafnetty.mapper.MessageMapper;
 import org.kafnetty.repository.MessageRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -18,13 +20,13 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 public final class MessageServiceImpl implements MessageService {
-    private final KafnettyProducer kafkaProducer;
+    private final KafnettyKafkaConfig kafnettyKafkaConfig;
     private final MessageMapper messageMapper;
     private final MessageRepository messageRepository;
 
     @Override
     public ChannelMessageDto processLocalMessage(ChannelMessageDto message, Channel channel) {
-        message.setClusterId(kafkaProducer.getGroupId());
+        message.setClusterId(kafnettyKafkaConfig.getGroupId());
         return processMessage(message);
     }
 
@@ -32,6 +34,7 @@ public final class MessageServiceImpl implements MessageService {
     public ChannelMessageDto processMessage(ChannelMessageDto message) {
         Message chatMessage = messageMapper.ChannelMessageDtoToMessage(message);
         if (!messageRepository.existsById(chatMessage.getId())) {
+            chatMessage.setSent(!kafnettyKafkaConfig.getGroupId().equals(message.getClusterId()));
             messageRepository.saveAndFlush(chatMessage);
         }
         return messageMapper.MessageToChannelMessageDto(chatMessage);
@@ -49,7 +52,7 @@ public final class MessageServiceImpl implements MessageService {
             // TODO обработать неверный вход
             throw new RuntimeException("Illegal value roomId");
         }
-        messageListDto.setMessages(messageRepository.findByRoomId(roomId).stream().map(messageMapper::MessageToChannelMessageDto).toList());
+        messageListDto.setMessages(messageRepository.findByRoomIdOrderByTs(roomId).stream().map(messageMapper::MessageToChannelMessageDto).toList());
         return messageListDto;
     }
 
@@ -61,5 +64,11 @@ public final class MessageServiceImpl implements MessageService {
             message.setSent(true);
             messageRepository.saveAndFlush(message);
         }
+    }
+
+    @Override
+    public List<ChannelMessageDto> getNotSyncMessages() {
+        List<Message> messages = messageRepository.findAllByIsSentAndClusterId(false, kafnettyKafkaConfig.getGroupId());
+        return messageMapper.mapToChannelMessageDtoList(messages);
     }
 }

@@ -1,10 +1,12 @@
 package org.kafnetty.service;
 
 import io.netty.channel.Channel;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.kafnetty.dto.UserProfileDto;
 import org.kafnetty.dto.channel.*;
+import org.kafnetty.dto.kafka.KafkaClientDto;
 import org.kafnetty.dto.kafka.KafkaMessageDto;
 import org.kafnetty.dto.kafka.KafkaRoomDto;
 import org.kafnetty.mapper.ClientMapper;
@@ -13,6 +15,8 @@ import org.kafnetty.mapper.RoomMapper;
 import org.kafnetty.mapper.UserProfileDtoMapper;
 import org.kafnetty.repository.ChannelRepository;
 import org.kafnetty.type.OPERATION_TYPE;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -71,7 +75,7 @@ public class ChatServiceImpl implements ChatService {
                 ChannelRoomDto channelRoomDto = roomService.processLocalMessage((ChannelRoomDto) messageDto, channel);
                 channelRepository.sendToRoom(clientService.getProfile(channel.id().asLongText()).getRoomId(), channelRoomDto);
                 kafkaProducerService.sendRoom(roomMapper.ChannelRoomDtoToKafkaRoomDto(channelRoomDto),
-                        kafkaDto -> roomService.setMessageAsSended(roomMapper.KafkaRoomDtoToChannelRoomDto((KafkaRoomDto) kafkaDto)));
+                        kafkaDto -> roomService.setRoomAsSended(roomMapper.KafkaRoomDtoToChannelRoomDto((KafkaRoomDto) kafkaDto)));
                 break;
             case MESSAGE_LIST:
                 ChannelMessageListDto channelMessageListDto = messageService.processMessageList((ChannelMessageListDto) messageDto, channel);
@@ -84,7 +88,7 @@ public class ChatServiceImpl implements ChatService {
                 if (channelClientDto.getOperationType() == OPERATION_TYPE.UPDATE ||
                         channelClientDto.getOperationType() == OPERATION_TYPE.CREATE) {
                     kafkaProducerService.sendClient(clientMapper.ChannelClientDtoToKafkaMessageDto(channelClientDto),
-                            kafkaDto -> {});
+                            kafkaDto -> clientService.setClientAsSended(clientMapper.KafkaClientDtoToChannelClientDto((KafkaClientDto) kafkaDto)));
                 }
                 channelClientDto.writeAndFlush(channel);
                 break;
@@ -105,6 +109,21 @@ public class ChatServiceImpl implements ChatService {
         } else {
             roomService.getRoomList(userProfileDto.getId()).writeAndFlush(channel);
             userProfileDtoMapper.UserProfileDtoToChannelClientDto(userProfileDto).writeAndFlush(channel);
+        }
+    }
+    @EventListener(ApplicationReadyEvent.class)
+    public void syncObjectCollections(){
+        for (ChannelClientDto channelClientDto: clientService.getNotSyncClients()) {
+            kafkaProducerService.sendClient(clientMapper.ChannelClientDtoToKafkaMessageDto(channelClientDto),
+                    kafkaDto -> clientService.setClientAsSended(clientMapper.KafkaClientDtoToChannelClientDto((KafkaClientDto) kafkaDto)));
+        }
+        for (ChannelRoomDto channelRoomDto: roomService.getNotSyncRooms()) {
+            kafkaProducerService.sendRoom(roomMapper.ChannelRoomDtoToKafkaRoomDto(channelRoomDto),
+                    kafkaDto -> roomService.setRoomAsSended(roomMapper.KafkaRoomDtoToChannelRoomDto((KafkaRoomDto) kafkaDto)));
+        }
+        for (ChannelMessageDto channelMessageDto: messageService.getNotSyncMessages()) {
+            kafkaProducerService.sendMessage(messageMapper.ChannelMessageDtoToKafkaMessageDto(channelMessageDto),
+                    kafkaDto -> messageService.setMessageAsSended(messageMapper.KafkaMessageDtoToChannelMessageDto((KafkaMessageDto) kafkaDto)));
         }
     }
 }
