@@ -1,19 +1,17 @@
 package org.kafnetty.service;
 
-import io.netty.channel.Channel;
-import org.kafnetty.dto.channel.ChannelRoomDto;
-import org.kafnetty.dto.channel.ChannelRoomListDto;
+import org.kafnetty.dto.RoomDto;
+import org.kafnetty.dto.RoomListDto;
 
 import java.util.List;
 import java.util.UUID;
 
 public interface RoomService {
-    ChannelRoomDto processMessage(ChannelRoomDto message);
+    RoomDto processMessage(RoomDto message);
 
-    ChannelRoomDto processLocalMessage(ChannelRoomDto message, Channel channel);
+    RoomListDto getRoomList(UUID clientId);
 
-    ChannelRoomListDto getRoomList(UUID clientId);
+    void setRoomAsSended(RoomDto channelRoomDto);
 
-    void setRoomAsSended(ChannelRoomDto channelRoomDto);
-    List<ChannelRoomDto> getNotSyncRooms();
+    List<RoomDto> getNotSyncRooms();
 }

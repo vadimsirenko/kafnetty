@@ -5,7 +5,7 @@ import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import lombok.extern.slf4j.Slf4j;
-import org.kafnetty.dto.channel.ChannelBaseDto;
+import org.kafnetty.dto.BaseDto;
 import org.springframework.stereotype.Repository;
 
 import java.util.Map;
@@ -45,16 +45,16 @@ public class ChannelRepositoryImpl implements ChannelRepository {
     }
 
     @Override
-    public void sendToRoom(UUID roomId, ChannelBaseDto channelBaseDto) {
+    public void sendToRoom(UUID roomId, BaseDto baseDto) {
         if (roomId != null && CHANNEL_GROUP_MAP.containsKey(roomId)) {
-            channelBaseDto.writeAndFlush(CHANNEL_GROUP_MAP.get(roomId));
+            baseDto.writeAndFlush(CHANNEL_GROUP_MAP.get(roomId));
         }
     }
 
     @Override
-    public void sendToAllRoom(ChannelBaseDto channelBaseDto) {
+    public void sendToAllRoom(BaseDto baseDto) {
         for (UUID roomId : CHANNEL_GROUP_MAP.keySet()) {
-            channelBaseDto.writeAndFlush(CHANNEL_GROUP_MAP.get(roomId));
+            baseDto.writeAndFlush(CHANNEL_GROUP_MAP.get(roomId));
         }
     }
 }

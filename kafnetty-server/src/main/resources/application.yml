@@ -39,13 +39,18 @@ spring:
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-      #value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       properties:
-        spring.json.value.default.type: org.kafnetty.dto.kafka.KafkaBaseDto
+        spring.json.value.default.type: org.kafnetty.dto.BaseDto
         #spring.json.trusted.packages: 'org.kafnetty.dto.kafka'
+
+
 logging:
   level:
     org:
       springframework:
         boot:
           autoconfigure: error
+        kafka:
+          listener:
+            org.springframework.kafka.listener.KafkaMessageListenerContainer: error
+      kafnetty: debug

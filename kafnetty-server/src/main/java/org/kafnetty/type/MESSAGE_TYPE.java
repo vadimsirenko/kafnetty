@@ -17,8 +17,6 @@ public enum MESSAGE_TYPE {
     INFO,
     @JsonProperty("ERROR")
     ERROR,
-    @JsonProperty("USER_PROFILE")
-    USER_PROFILE,
     @JsonProperty("UNKNOWN")
     UNKNOWN
 }

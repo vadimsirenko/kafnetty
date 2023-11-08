@@ -1,4 +1,4 @@
-package org.kafnetty.dto.channel;
+package org.kafnetty.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
@@ -11,23 +11,17 @@ import java.util.UUID;
 
 @Getter
 @Setter
-public class ChannelMessageListDto extends ChannelBaseDto {
+public class MessageListDto extends BaseDto {
     @JsonProperty("messages")
-    private List<ChannelMessageDto> messages;
+    private List<MessageDto> messages;
     private UUID roomId;
     private UUID senderId;
 
-    public ChannelMessageListDto(OPERATION_TYPE operationType, UUID roomId, List<ChannelMessageDto> messages) {
-        super(MESSAGE_TYPE.MESSAGE_LIST, operationType);
-        this.roomId = roomId;
-        this.messages = messages;
-    }
-
-    public ChannelMessageListDto() {
+    public MessageListDto() {
         super(MESSAGE_TYPE.MESSAGE_LIST, OPERATION_TYPE.UPDATE);
     }
 
-    public ChannelMessageListDto(UUID roomId, UUID senderId) {
+    public MessageListDto(UUID roomId, UUID senderId) {
         this();
         this.roomId = roomId;
         this.senderId = senderId;

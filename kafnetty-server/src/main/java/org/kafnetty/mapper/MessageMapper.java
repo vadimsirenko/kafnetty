@@ -1,9 +1,6 @@
 package org.kafnetty.mapper;
 
-import org.kafnetty.dto.channel.ChannelClientDto;
-import org.kafnetty.dto.channel.ChannelMessageDto;
-import org.kafnetty.dto.kafka.KafkaMessageDto;
-import org.kafnetty.entity.Client;
+import org.kafnetty.dto.MessageDto;
 import org.kafnetty.entity.Message;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -18,17 +15,11 @@ public interface MessageMapper {
 
     @Mapping(ignore = true, target = "messageType")
     @Mapping(ignore = true, target = "operationType")
-    ChannelMessageDto MessageToChannelMessageDto(Message message);
+    MessageDto MessageToChannelMessageDto(Message message);
 
     @Mapping(ignore = true, target = "sent")
-    Message ChannelMessageDtoToMessage(ChannelMessageDto channelMessageDto);
+    Message ChannelMessageDtoToMessage(MessageDto channelMessageDto);
 
-    List<ChannelMessageDto> mapToChannelMessageDtoList(List<Message> clients);
-
-    @Mapping(ignore = true, target = "kafkaMessageId")
-    @Mapping(ignore = true, target = "clusterId")
-    KafkaMessageDto ChannelMessageDtoToKafkaMessageDto(ChannelMessageDto channelMessageDto);
-
-    ChannelMessageDto KafkaMessageDtoToChannelMessageDto(KafkaMessageDto kafkaMessageDto);
+    List<MessageDto> mapToChannelMessageDtoList(List<Message> clients);
 }
 

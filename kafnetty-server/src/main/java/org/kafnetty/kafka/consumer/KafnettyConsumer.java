@@ -2,13 +2,10 @@ package org.kafnetty.kafka.consumer;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.kafnetty.dto.channel.ChannelClientDto;
-import org.kafnetty.dto.channel.ChannelMessageDto;
-import org.kafnetty.dto.channel.ChannelRoomDto;
-import org.kafnetty.dto.kafka.KafkaBaseDto;
-import org.kafnetty.dto.kafka.KafkaClientDto;
-import org.kafnetty.dto.kafka.KafkaMessageDto;
-import org.kafnetty.dto.kafka.KafkaRoomDto;
+import org.kafnetty.dto.BaseDto;
+import org.kafnetty.dto.ClientDto;
+import org.kafnetty.dto.MessageDto;
+import org.kafnetty.dto.RoomDto;
 import org.kafnetty.mapper.ClientMapper;
 import org.kafnetty.mapper.MessageMapper;
 import org.kafnetty.mapper.RoomMapper;
@@ -24,9 +21,6 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @RequiredArgsConstructor
 public class KafnettyConsumer {
-    @Value("${spring.kafka.group-id}")
-    private String groupId;
-
     private final MessageMapper messageMapper;
     private final RoomMapper roomMapper;
     private final ClientMapper clientMapper;
@@ -34,6 +28,8 @@ public class KafnettyConsumer {
     private final RoomService roomService;
     private final ClientService clientService;
     private final ChannelRepository channelRepository;
+    @Value("${spring.kafka.group-id}")
+    private String groupId;
 
     /*
         @RetryableTopic(kafkaTemplate = "kafkaTemplate",
@@ -48,25 +44,25 @@ public class KafnettyConsumer {
         )
         */
     @KafkaListener(topics = "${spring.kafka.topic.name}", groupId = "${spring.kafka.group-id}")
-    public void process(KafkaBaseDto message) {
-        log.info("polled records.counter:{}", message.getKafkaMessageId());
+    public void process(BaseDto message) {
+        log.info("polled records.counter:{}", message.getId());
         try {
-            if (message instanceof KafkaMessageDto) {
+            if (message instanceof MessageDto) {
 
                 if (!message.getClusterId().equals(groupId)) {
-                    ChannelMessageDto channelMessageDto = messageMapper.KafkaMessageDtoToChannelMessageDto((KafkaMessageDto) message);
+                    MessageDto channelMessageDto = (MessageDto) message;
                     messageService.processMessage(channelMessageDto);
                     channelRepository.sendToRoom(channelMessageDto.getRoomId(), channelMessageDto);
                 }
-            } else if (message instanceof KafkaRoomDto) {
+            } else if (message instanceof RoomDto) {
                 if (!message.getClusterId().equals(groupId)) {
-                    ChannelRoomDto channelRoomDto = roomMapper.KafkaRoomDtoToChannelRoomDto((KafkaRoomDto) message);
+                    RoomDto channelRoomDto = (RoomDto) message;
                     roomService.processMessage(channelRoomDto);
                     channelRepository.sendToAllRoom(channelRoomDto);
                 }
-            } else if (message instanceof KafkaClientDto) {
+            } else if (message instanceof ClientDto) {
                 if (!message.getClusterId().equals(groupId)) {
-                    ChannelClientDto channelClientDto = clientMapper.KafkaClientDtoToChannelClientDto((KafkaClientDto) message);
+                    ClientDto channelClientDto = (ClientDto) message;
                     clientService.processMessage(channelClientDto, null);
                 }
             }

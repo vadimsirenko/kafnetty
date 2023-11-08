@@ -3,12 +3,10 @@ package org.kafnetty.service;
 import io.netty.channel.Channel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.kafnetty.dto.UserProfileDto;
-import org.kafnetty.dto.channel.ChannelClientDto;
+import org.kafnetty.dto.ClientDto;
 import org.kafnetty.entity.Client;
 import org.kafnetty.kafka.config.KafnettyKafkaConfig;
 import org.kafnetty.mapper.ClientMapper;
-import org.kafnetty.mapper.UserProfileDtoMapper;
 import org.kafnetty.repository.ClientRepository;
 import org.kafnetty.type.OPERATION_TYPE;
 import org.springframework.stereotype.Service;
@@ -20,51 +18,44 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequiredArgsConstructor
 @Slf4j
 public class ClientServiceImpl implements ClientService {
-    private static final Map<String, UserProfileDto> USER_PROFILES = new ConcurrentHashMap<>();
+    private static final Map<String, ClientDto> CHANNEL_USERS = new ConcurrentHashMap<>();
     private final ClientRepository clientRepository;
-    private final UserProfileDtoMapper userProfileDtoMapper;
     private final ClientMapper clientMapper;
     private final KafnettyKafkaConfig kafnettyKafkaConfig;
 
-    private static boolean checkToken(ChannelClientDto req) {
+    private static boolean checkToken(ClientDto req) {
         return true;
     }
 
     @Override
-    public UserProfileDto getProfile(String channelLongId) {
+    public ClientDto getChannelUser(String channelLongId) {
         if (channelLongId != null) {
-            return USER_PROFILES.get(channelLongId);
+            return CHANNEL_USERS.get(channelLongId);
         }
         return null;
     }
 
     @Override
-    public boolean existsUserProfile(String channelLongId) {
-        return USER_PROFILES.containsKey(channelLongId);
+    public boolean existsChannelUser(String channelLongId) {
+        return CHANNEL_USERS.containsKey(channelLongId);
     }
 
     @Override
-    public void setRoomForUserProfile(UUID roomId, String channelLongId) {
-        if (USER_PROFILES.containsKey(channelLongId)) {
-            UserProfileDto userProfileDto = USER_PROFILES.get(channelLongId);
-            userProfileDto.setRoomId(roomId);
-            USER_PROFILES.put(channelLongId, userProfileDto);
+    public void setRoomForChannelUser(UUID roomId, String channelLongId) {
+        if (CHANNEL_USERS.containsKey(channelLongId)) {
+            ClientDto clientDto = CHANNEL_USERS.get(channelLongId);
+            clientDto.setRoomId(roomId);
+            CHANNEL_USERS.put(channelLongId, clientDto);
         }
     }
 
     @Override
-    public void removeProfile(String channelLongId) {
-        USER_PROFILES.remove(channelLongId);
+    public void removeChannelUser(String channelLongId) {
+        CHANNEL_USERS.remove(channelLongId);
     }
 
     @Override
-    public ChannelClientDto processLocalMessage(ChannelClientDto message, Channel channel) {
-        message.setClusterId(kafnettyKafkaConfig.getGroupId());
-        return processMessage(message, channel);
-    }
-
-    @Override
-    public ChannelClientDto processMessage(ChannelClientDto message, Channel channel) {
+    public ClientDto processMessage(ClientDto message, Channel channel) {
         if (message == null) {
             throw new RuntimeException("User is not authorized");
         }
@@ -95,15 +86,15 @@ public class ClientServiceImpl implements ClientService {
         }
         client.setRoomId(message.getRoomId());
         if (channel != null) {
-            USER_PROFILES.put(channel.id().asLongText(), userProfileDtoMapper.ClientToUserProfileDto(client));
+            CHANNEL_USERS.put(channel.id().asLongText(), clientMapper.ClientToChannelClientDto(client));
         }
-        ChannelClientDto result = clientMapper.ClientToChannelClientDto(client);
+        ClientDto result = clientMapper.ClientToChannelClientDto(client);
         result.setOperationType(message.getOperationType());
         return result;
     }
 
     @Override
-    public void setClientAsSended(ChannelClientDto channelClientDto) {
+    public void setClientAsSended(ClientDto channelClientDto) {
         Optional<Client> clientOptional = clientRepository.findById(channelClientDto.getId());
         if (clientOptional.isPresent()) {
             Client client = clientOptional.get();
@@ -111,8 +102,9 @@ public class ClientServiceImpl implements ClientService {
             clientRepository.saveAndFlush(client);
         }
     }
+
     @Override
-    public List<ChannelClientDto> getNotSyncClients(){
+    public List<ClientDto> getNotSyncClients() {
         List<Client> clients = clientRepository.findAllByIsSentAndClusterId(false, kafnettyKafkaConfig.getGroupId());
         return clientMapper.mapToChannelClientDtoList(clients);
     }

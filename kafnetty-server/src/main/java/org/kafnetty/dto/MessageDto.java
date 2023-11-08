@@ -1,4 +1,4 @@
-package org.kafnetty.dto.channel;
+package org.kafnetty.dto;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -9,15 +9,14 @@ import java.util.UUID;
 
 @Getter
 @Setter
-public class ChannelMessageDto extends ChannelBaseDto {
-    private UUID id;
+public class MessageDto extends BaseDto {
     private String messageText;
     private UUID senderId;
     private UUID roomId;
     private String sender;
     private String clusterId;
 
-    public ChannelMessageDto() {
+    public MessageDto() {
         super(MESSAGE_TYPE.MESSAGE, OPERATION_TYPE.CREATE);
     }
 }

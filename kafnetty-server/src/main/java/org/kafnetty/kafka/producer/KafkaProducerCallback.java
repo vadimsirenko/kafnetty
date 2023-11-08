@@ -1,7 +1,8 @@
 package org.kafnetty.kafka.producer;
 
-import org.kafnetty.dto.kafka.KafkaBaseDto;
+
+import org.kafnetty.dto.BaseDto;
 
 public interface KafkaProducerCallback {
-    void run(KafkaBaseDto kafkaDto);
+    void run(BaseDto kafkaDto);
 }

@@ -9,7 +9,7 @@ import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.kafnetty.dto.channel.ChannelErrorDto;
+import org.kafnetty.dto.ErrorDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -27,6 +27,7 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 @RequiredArgsConstructor
 @Slf4j
 public class HttpRequestServiceImpl implements HttpRequestService {
+    private final HttpResponseProcessor httpResponseProcessor;
     @Autowired
     private ChatService chatService;
     @Value("${server.web-socket-path}")
@@ -35,13 +36,12 @@ public class HttpRequestServiceImpl implements HttpRequestService {
     private String staticPath;
     @Value("${server.chat-path}")
     private String chatPath;
-    private final HttpResponseProcessor httpResponseProcessor;
 
     @Override
     public void processWebSocketRequest(Channel channel, WebSocketFrame frame) {
         try {
-            if (!chatService.existsUserProfile(channel)) {
-                ChannelErrorDto.createCommonError("You can't chat without logging in").writeAndFlush(channel);
+            if (!chatService.existsChannelUser(channel)) {
+                ErrorDto.createCommonError("You can't chat without logging in").writeAndFlush(channel);
             } else {
                 chatService.processMessage(((TextWebSocketFrame) frame).text(), channel);
             }

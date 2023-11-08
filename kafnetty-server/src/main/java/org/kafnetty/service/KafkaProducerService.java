@@ -1,14 +1,14 @@
 package org.kafnetty.service;
 
-import org.kafnetty.dto.kafka.KafkaClientDto;
-import org.kafnetty.dto.kafka.KafkaMessageDto;
-import org.kafnetty.dto.kafka.KafkaRoomDto;
+import org.kafnetty.dto.ClientDto;
+import org.kafnetty.dto.MessageDto;
+import org.kafnetty.dto.RoomDto;
 import org.kafnetty.kafka.producer.KafkaProducerCallback;
 
 public interface KafkaProducerService {
-    void sendMessage(KafkaMessageDto kafkaMessageDto, KafkaProducerCallback kafkaProducerCallback);
+    void sendMessage(MessageDto channelMessageDto, KafkaProducerCallback kafkaProducerCallback);
 
-    void sendRoom(KafkaRoomDto kafkaRoomDto, KafkaProducerCallback kafkaProducerCallback);
+    void sendRoom(RoomDto channelRoomDto, KafkaProducerCallback kafkaProducerCallback);
 
-    void sendClient(KafkaClientDto kafkaClientDto, KafkaProducerCallback kafkaProducerCallback);
+    void sendClient(ClientDto channelClientDto, KafkaProducerCallback kafkaProducerCallback);
 }

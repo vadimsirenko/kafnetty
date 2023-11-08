@@ -25,8 +25,8 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 @RequiredArgsConstructor
 @Slf4j
 public class HttpResponseProcessor {
-    private final ResourceLoader resourceLoader;
     private static final Tika tika = new Tika();
+    private final ResourceLoader resourceLoader;
 
     public void handleResource(ChannelHandlerContext ctx, HttpRequest request, String resourcePath) {
         int questionIndex = resourcePath.indexOf("?");

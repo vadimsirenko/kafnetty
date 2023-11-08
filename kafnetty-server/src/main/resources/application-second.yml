@@ -40,7 +40,7 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
-        spring.json.value.default.type: org.kafnetty.dto.kafka.KafkaBaseDto
+        spring.json.value.default.type: org.kafnetty.dto.BaseDto
         #spring.json.trusted.packages: 'org.kafnetty.dto.kafka'
 logging:
   level:

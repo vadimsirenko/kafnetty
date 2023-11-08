@@ -1,7 +1,7 @@
 package org.kafnetty.kafka.producer;
 
-import org.kafnetty.dto.kafka.KafkaBaseDto;
+import org.kafnetty.dto.BaseDto;
 
 public interface KafnettyProducer {
-    boolean create(KafkaBaseDto kafkaBaseDto, KafkaProducerCallback successCallback);
+    boolean create(BaseDto kafkaBaseDto, KafkaProducerCallback successCallback);
 }

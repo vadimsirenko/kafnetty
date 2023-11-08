@@ -3,9 +3,8 @@ package org.kafnetty.service;
 import io.netty.channel.Channel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.kafnetty.dto.channel.ChannelMessageDto;
-import org.kafnetty.dto.channel.ChannelMessageListDto;
-import org.kafnetty.entity.Client;
+import org.kafnetty.dto.MessageDto;
+import org.kafnetty.dto.MessageListDto;
 import org.kafnetty.entity.Message;
 import org.kafnetty.kafka.config.KafnettyKafkaConfig;
 import org.kafnetty.mapper.MessageMapper;
@@ -25,13 +24,7 @@ public final class MessageServiceImpl implements MessageService {
     private final MessageRepository messageRepository;
 
     @Override
-    public ChannelMessageDto processLocalMessage(ChannelMessageDto message, Channel channel) {
-        message.setClusterId(kafnettyKafkaConfig.getGroupId());
-        return processMessage(message);
-    }
-
-    @Override
-    public ChannelMessageDto processMessage(ChannelMessageDto message) {
+    public MessageDto processMessage(MessageDto message) {
         Message chatMessage = messageMapper.ChannelMessageDtoToMessage(message);
         if (!messageRepository.existsById(chatMessage.getId())) {
             chatMessage.setSent(!kafnettyKafkaConfig.getGroupId().equals(message.getClusterId()));
@@ -41,13 +34,13 @@ public final class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public ChannelMessageListDto processMessageList(ChannelMessageListDto messageListDto, Channel channel) {
+    public MessageListDto processMessageList(MessageListDto messageListDto, Channel channel) {
         return getMessageListByRoomId(messageListDto.getRoomId(), messageListDto.getSenderId());
     }
 
     @Override
-    public ChannelMessageListDto getMessageListByRoomId(UUID roomId, UUID senderId) {
-        ChannelMessageListDto messageListDto = new ChannelMessageListDto(roomId, senderId);
+    public MessageListDto getMessageListByRoomId(UUID roomId, UUID senderId) {
+        MessageListDto messageListDto = new MessageListDto(roomId, senderId);
         if (messageListDto.getRoomId() == null) {
             // TODO обработать неверный вход
             throw new RuntimeException("Illegal value roomId");
@@ -57,7 +50,7 @@ public final class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public void setMessageAsSended(ChannelMessageDto channelMessageDto) {
+    public void setMessageAsSended(MessageDto channelMessageDto) {
         Optional<Message> messageOptional = messageRepository.findById(channelMessageDto.getId());
         if (messageOptional.isPresent()) {
             Message message = messageOptional.get();
@@ -67,7 +60,7 @@ public final class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public List<ChannelMessageDto> getNotSyncMessages() {
+    public List<MessageDto> getNotSyncMessages() {
         List<Message> messages = messageRepository.findAllByIsSentAndClusterId(false, kafnettyKafkaConfig.getGroupId());
         return messageMapper.mapToChannelMessageDtoList(messages);
     }

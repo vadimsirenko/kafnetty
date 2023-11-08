@@ -1,18 +1,10 @@
 package org.kafnetty.service;
 
 import io.netty.channel.Channel;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.kafnetty.dto.UserProfileDto;
-import org.kafnetty.dto.channel.*;
-import org.kafnetty.dto.kafka.KafkaClientDto;
-import org.kafnetty.dto.kafka.KafkaMessageDto;
-import org.kafnetty.dto.kafka.KafkaRoomDto;
-import org.kafnetty.mapper.ClientMapper;
-import org.kafnetty.mapper.MessageMapper;
-import org.kafnetty.mapper.RoomMapper;
-import org.kafnetty.mapper.UserProfileDtoMapper;
+import org.kafnetty.dto.*;
+import org.kafnetty.kafka.config.KafnettyKafkaConfig;
 import org.kafnetty.repository.ChannelRepository;
 import org.kafnetty.type.OPERATION_TYPE;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -30,100 +22,100 @@ public class ChatServiceImpl implements ChatService {
     private final RoomService roomService;
     private final KafkaProducerService kafkaProducerService;
     private final ChannelRepository channelRepository;
-    private final UserProfileDtoMapper userProfileDtoMapper;
-    private final MessageMapper messageMapper;
-    private final RoomMapper roomMapper;
-    private final ClientMapper clientMapper;
+    private final KafnettyKafkaConfig kafnettyKafkaConfig;
 
     @Override
     public void putChannel(UUID roomId, Channel channel) {
-        UserProfileDto userProfileDto = clientService.getProfile(channel.id().asLongText());
-        UUID oldRoomId = (userProfileDto != null) ? userProfileDto.getRoomId() : null;
+        ClientDto clientDto = clientService.getChannelUser(channel.id().asLongText());
+        UUID oldRoomId = (clientDto != null) ? clientDto.getRoomId() : null;
         channelRepository.changeRoom(roomId, oldRoomId, channel
                 , oldGroup -> {
-                    assert userProfileDto != null;
-                    ChannelInfoDto.createLogoffInfo(userProfileDto.getNickName()).writeAndFlush(oldGroup);
+                    assert clientDto != null;
+                    InfoDto.createLogoffInfo(clientDto.getNickName()).writeAndFlush(oldGroup);
                 }
                 , group -> {
-                    assert userProfileDto != null;
-                    ChannelInfoDto.createLogonInfo(userProfileDto.getNickName()).writeAndFlush(group);
-                    clientService.setRoomForUserProfile(roomId, channel.id().asLongText());
+                    assert clientDto != null;
+                    InfoDto.createLogonInfo(clientDto.getNickName()).writeAndFlush(group);
+                    clientService.setRoomForChannelUser(roomId, channel.id().asLongText());
                 });
     }
 
     @Override
     public void removeChannel(Channel channel) {
-        UserProfileDto userProfileDto = clientService.getProfile(channel.id().asLongText());
-        UUID roomIdOld = (userProfileDto != null) ? userProfileDto.getRoomId() : null;
-        assert userProfileDto != null;
+        ClientDto clientDto = clientService.getChannelUser(channel.id().asLongText());
+        UUID roomIdOld = (clientDto != null) ? clientDto.getRoomId() : null;
+        assert clientDto != null;
         channelRepository.removeChannelFromRoom(roomIdOld, channel,
-                oldGroup -> ChannelInfoDto.createLogoffInfo(userProfileDto.getNickName()).writeAndFlush(oldGroup));
-        clientService.removeProfile(channel.id().asLongText());
+                oldGroup -> InfoDto.createLogoffInfo(clientDto.getNickName()).writeAndFlush(oldGroup));
+        clientService.removeChannelUser(channel.id().asLongText());
     }
 
     @Override
     public void processMessage(String jsonMessage, Channel channel) {
-        ChannelBaseDto messageDto = ChannelBaseDto.decode(jsonMessage);
+        BaseDto messageDto = BaseDto.decode(jsonMessage);
+        messageDto.setClusterId(kafnettyKafkaConfig.getGroupId());
         switch (messageDto.getMessageType()) {
-            case MESSAGE:
-                ChannelMessageDto channelMessageDto = messageService.processLocalMessage((ChannelMessageDto) messageDto, channel);
-                channelRepository.sendToRoom(clientService.getProfile(channel.id().asLongText()).getRoomId(), channelMessageDto);
-                kafkaProducerService.sendMessage(messageMapper.ChannelMessageDtoToKafkaMessageDto(channelMessageDto),
-                        kafkaDto -> messageService.setMessageAsSended(messageMapper.KafkaMessageDtoToChannelMessageDto((KafkaMessageDto) kafkaDto)));
-                break;
-            case ROOM:
-                ChannelRoomDto channelRoomDto = roomService.processLocalMessage((ChannelRoomDto) messageDto, channel);
-                channelRepository.sendToRoom(clientService.getProfile(channel.id().asLongText()).getRoomId(), channelRoomDto);
-                kafkaProducerService.sendRoom(roomMapper.ChannelRoomDtoToKafkaRoomDto(channelRoomDto),
-                        kafkaDto -> roomService.setRoomAsSended(roomMapper.KafkaRoomDtoToChannelRoomDto((KafkaRoomDto) kafkaDto)));
-                break;
-            case MESSAGE_LIST:
-                ChannelMessageListDto channelMessageListDto = messageService.processMessageList((ChannelMessageListDto) messageDto, channel);
+            case MESSAGE -> {
+                MessageDto channelMessageDto = messageService.processMessage((MessageDto) messageDto);
+                channelRepository.sendToRoom(clientService.getChannelUser(channel.id().asLongText()).getRoomId(), channelMessageDto);
+                kafkaProducerService.sendMessage(channelMessageDto,
+                        dto -> messageService.setMessageAsSended((MessageDto) dto));
+            }
+            case ROOM -> {
+                RoomDto channelRoomDto = roomService.processMessage((RoomDto) messageDto);
+                channelRepository.sendToRoom(clientService.getChannelUser(channel.id().asLongText()).getRoomId(), channelRoomDto);
+                kafkaProducerService.sendRoom(channelRoomDto,
+                        dto -> roomService.setRoomAsSended((RoomDto) dto));
+            }
+            case MESSAGE_LIST -> {
+                MessageListDto channelMessageListDto = messageService.processMessageList((MessageListDto) messageDto, channel);
                 putChannel(channelMessageListDto.getRoomId(), channel);
                 channelMessageListDto.writeAndFlush(channel);
-                break;
-            case CLIENT:
-                ChannelClientDto channelClientDto = clientService.processLocalMessage((ChannelClientDto) messageDto, channel);
+            }
+            case CLIENT -> {
+                ClientDto channelClientDto = clientService.processMessage((ClientDto) messageDto, channel);
                 putChannel(channelClientDto.getRoomId(), channel);
                 if (channelClientDto.getOperationType() == OPERATION_TYPE.UPDATE ||
                         channelClientDto.getOperationType() == OPERATION_TYPE.CREATE) {
-                    kafkaProducerService.sendClient(clientMapper.ChannelClientDtoToKafkaMessageDto(channelClientDto),
-                            kafkaDto -> clientService.setClientAsSended(clientMapper.KafkaClientDtoToChannelClientDto((KafkaClientDto) kafkaDto)));
+                    kafkaProducerService.sendClient(channelClientDto,
+                            dto -> clientService.setClientAsSended((ClientDto) dto));
                 }
                 channelClientDto.writeAndFlush(channel);
-                break;
-            default:
+            }
+            default -> {
+            }
         }
     }
 
     @Override
-    public boolean existsUserProfile(Channel channel) {
-        return clientService.existsUserProfile(channel.id().asLongText());
+    public boolean existsChannelUser(Channel channel) {
+        return clientService.existsChannelUser(channel.id().asLongText());
     }
 
     @Override
     public void InitChannel(Channel channel) {
-        UserProfileDto userProfileDto = clientService.getProfile(channel.id().asLongText());
-        if (userProfileDto.getId() == null) {
+        ClientDto clientDto = clientService.getChannelUser(channel.id().asLongText());
+        if (clientDto.getId() == null) {
             System.out.println(channel + " tourist");
         } else {
-            roomService.getRoomList(userProfileDto.getId()).writeAndFlush(channel);
-            userProfileDtoMapper.UserProfileDtoToChannelClientDto(userProfileDto).writeAndFlush(channel);
+            roomService.getRoomList(clientDto.getId()).writeAndFlush(channel);
+            clientDto.writeAndFlush(channel);
         }
     }
+
     @EventListener(ApplicationReadyEvent.class)
-    public void syncObjectCollections(){
-        for (ChannelClientDto channelClientDto: clientService.getNotSyncClients()) {
-            kafkaProducerService.sendClient(clientMapper.ChannelClientDtoToKafkaMessageDto(channelClientDto),
-                    kafkaDto -> clientService.setClientAsSended(clientMapper.KafkaClientDtoToChannelClientDto((KafkaClientDto) kafkaDto)));
+    public void syncObjectCollections() {
+        for (ClientDto channelClientDto : clientService.getNotSyncClients()) {
+            kafkaProducerService.sendClient(channelClientDto,
+                    dto -> clientService.setClientAsSended((ClientDto) dto));
         }
-        for (ChannelRoomDto channelRoomDto: roomService.getNotSyncRooms()) {
-            kafkaProducerService.sendRoom(roomMapper.ChannelRoomDtoToKafkaRoomDto(channelRoomDto),
-                    kafkaDto -> roomService.setRoomAsSended(roomMapper.KafkaRoomDtoToChannelRoomDto((KafkaRoomDto) kafkaDto)));
+        for (RoomDto channelRoomDto : roomService.getNotSyncRooms()) {
+            kafkaProducerService.sendRoom(channelRoomDto,
+                    dto -> roomService.setRoomAsSended((RoomDto) dto));
         }
-        for (ChannelMessageDto channelMessageDto: messageService.getNotSyncMessages()) {
-            kafkaProducerService.sendMessage(messageMapper.ChannelMessageDtoToKafkaMessageDto(channelMessageDto),
-                    kafkaDto -> messageService.setMessageAsSended(messageMapper.KafkaMessageDtoToChannelMessageDto((KafkaMessageDto) kafkaDto)));
+        for (MessageDto channelMessageDto : messageService.getNotSyncMessages()) {
+            kafkaProducerService.sendMessage(channelMessageDto,
+                    dto -> messageService.setMessageAsSended((MessageDto) dto));
         }
     }
 }

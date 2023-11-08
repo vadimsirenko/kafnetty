@@ -82,6 +82,7 @@
                 let roomId = "2bd09cbf-ef16-469f-82ab-f51ae9913aa0";
                 let config = {
                     "messageType": "CLIENT",
+                    "id": null,
                     "operationType": "LOGON",
                     "login": userLogin,
                     "roomId": roomId,
@@ -155,6 +156,7 @@
                 if (this.socket.readyState === WebSocket.OPEN) {
 
                     let request = {
+                        "id": this.uuidv4(),
                         "messageType": "MESSAGE_LIST",
                         "operationType": "RECEIVE",
                         "senderId": this.senderId,

@@ -1,4 +1,4 @@
-package org.kafnetty.dto.channel;
+package org.kafnetty.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
@@ -8,7 +8,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.group.ChannelGroup;
-import io.netty.channel.group.ChannelGroupFuture;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -16,44 +15,46 @@ import lombok.Setter;
 import org.kafnetty.type.MESSAGE_TYPE;
 import org.kafnetty.type.OPERATION_TYPE;
 
+import java.util.UUID;
+
 @Getter
 @Setter
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
-        include = JsonTypeInfo.As.PROPERTY,
         property = "messageType")
 @JsonSubTypes({
-        @JsonSubTypes.Type(value = ChannelMessageDto.class, name = "MESSAGE"),
-        @JsonSubTypes.Type(value = ChannelMessageListDto.class, name = "MESSAGE_LIST"),
-        @JsonSubTypes.Type(value = ChannelRoomDto.class, name = "ROOM"),
-        @JsonSubTypes.Type(value = ChannelRoomListDto.class, name = "ROOM_LIST"),
-        @JsonSubTypes.Type(value = ChannelClientDto.class, name = "CLIENT"),
-        @JsonSubTypes.Type(value = ChannelErrorDto.class, name = "ERROR"),
-        @JsonSubTypes.Type(value = ChannelInfoDto.class, name = "INFO")
+        @JsonSubTypes.Type(value = MessageDto.class, name = "MESSAGE"),
+        @JsonSubTypes.Type(value = MessageListDto.class, name = "MESSAGE_LIST"),
+        @JsonSubTypes.Type(value = RoomDto.class, name = "ROOM"),
+        @JsonSubTypes.Type(value = RoomListDto.class, name = "ROOM_LIST"),
+        @JsonSubTypes.Type(value = ClientDto.class, name = "CLIENT"),
+        @JsonSubTypes.Type(value = ErrorDto.class, name = "ERROR"),
+        @JsonSubTypes.Type(value = InfoDto.class, name = "INFO")
 })
-public abstract class ChannelBaseDto<T extends ChannelBaseDto> {
+public abstract class BaseDto {
     private static ObjectMapper MAPPER = new ObjectMapper();
+    private UUID id = UUID.randomUUID();
+    private String clusterId;
     private MESSAGE_TYPE messageType;
     private OPERATION_TYPE operationType = OPERATION_TYPE.NONE;
     private Long ts;
 
-    public ChannelBaseDto(MESSAGE_TYPE messageType, OPERATION_TYPE operationType) {
+    public BaseDto(MESSAGE_TYPE messageType, OPERATION_TYPE operationType) {
         this.messageType = messageType;
         this.operationType = operationType;
         this.ts = System.currentTimeMillis();
     }
 
-    public ChannelBaseDto() {
+    public BaseDto() {
         this.messageType = MESSAGE_TYPE.UNKNOWN;
-        this.operationType = OPERATION_TYPE.NONE;
         this.ts = System.currentTimeMillis();
     }
 
-    public static ChannelBaseDto decode(String jsonMessage) {
+    public static BaseDto decode(String jsonMessage) {
         try {
-            return MAPPER.readValue(jsonMessage, ChannelBaseDto.class);
+            return MAPPER.readValue(jsonMessage, BaseDto.class);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -67,8 +68,8 @@ public abstract class ChannelBaseDto<T extends ChannelBaseDto> {
         }
     }
 
-    public ChannelGroupFuture writeAndFlush(ChannelGroup channelGroup) {
-        return channelGroup.writeAndFlush(new TextWebSocketFrame(this.toJson()));
+    public void writeAndFlush(ChannelGroup channelGroup) {
+        channelGroup.writeAndFlush(new TextWebSocketFrame(this.toJson()));
     }
 
     public ChannelFuture writeAndFlush(Channel channel) {

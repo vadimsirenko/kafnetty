@@ -1,11 +1,9 @@
 package org.kafnetty.service;
 
-import io.netty.channel.Channel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.kafnetty.dto.channel.ChannelRoomDto;
-import org.kafnetty.dto.channel.ChannelRoomListDto;
-import org.kafnetty.entity.Message;
+import org.kafnetty.dto.RoomDto;
+import org.kafnetty.dto.RoomListDto;
 import org.kafnetty.entity.Room;
 import org.kafnetty.kafka.config.KafnettyKafkaConfig;
 import org.kafnetty.mapper.RoomMapper;
@@ -26,13 +24,7 @@ public class RoomServiceImpl implements RoomService {
     private final RoomMapper roomMapper;
 
     @Override
-    public ChannelRoomDto processLocalMessage(ChannelRoomDto message, Channel channel) {
-        message.setClusterId(kafnettyKafkaConfig.getGroupId());
-        return processMessage(message);
-    }
-
-    @Override
-    public ChannelRoomDto processMessage(ChannelRoomDto roomDto) {
+    public RoomDto processMessage(RoomDto roomDto) {
         Room room = roomMapper.ChannelRoomDtoToRoom(roomDto);
         if (room == null)
             throw new RuntimeException("Message is not valid");
@@ -50,14 +42,14 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public ChannelRoomListDto getRoomList(UUID clientId) {
-        ChannelRoomListDto roomListDto = new ChannelRoomListDto();
+    public RoomListDto getRoomList(UUID clientId) {
+        RoomListDto roomListDto = new RoomListDto();
         roomListDto.setRooms(roomRepository.findAll().stream().map(roomMapper::RoomToChannelRoomDto).toList());
         return roomListDto;
     }
 
     @Override
-    public void setRoomAsSended(ChannelRoomDto channelRoomDto) {
+    public void setRoomAsSended(RoomDto channelRoomDto) {
         Optional<Room> roomOptional = roomRepository.findById(channelRoomDto.getId());
         if (roomOptional.isPresent()) {
             Room room = roomOptional.get();
@@ -67,7 +59,7 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public List<ChannelRoomDto> getNotSyncRooms() {
+    public List<RoomDto> getNotSyncRooms() {
         List<Room> rooms = roomRepository.findAllByIsSentAndClusterId(false, kafnettyKafkaConfig.getGroupId());
         return roomMapper.mapToChannelRoomDtoList(rooms);
     }

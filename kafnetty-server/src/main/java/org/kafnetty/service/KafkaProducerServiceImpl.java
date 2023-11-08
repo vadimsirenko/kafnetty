@@ -2,10 +2,10 @@ package org.kafnetty.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.kafnetty.dto.kafka.KafkaBaseDto;
-import org.kafnetty.dto.kafka.KafkaClientDto;
-import org.kafnetty.dto.kafka.KafkaMessageDto;
-import org.kafnetty.dto.kafka.KafkaRoomDto;
+import org.kafnetty.dto.BaseDto;
+import org.kafnetty.dto.ClientDto;
+import org.kafnetty.dto.MessageDto;
+import org.kafnetty.dto.RoomDto;
 import org.kafnetty.kafka.config.KafnettyKafkaConfig;
 import org.kafnetty.kafka.producer.KafkaProducerCallback;
 import org.kafnetty.kafka.producer.KafnettyProducer;
@@ -19,37 +19,37 @@ import java.util.function.Consumer;
 public class KafkaProducerServiceImpl implements KafkaProducerService {
     private final KafnettyKafkaConfig kafnettyKafkaConfig;
     private final KafnettyProducer kafnettyProducer;
-    private final Consumer<KafkaBaseDto> sendAsk =
-            message -> log.info("asked, value {}:{}", message.getMessageType(), message.getKafkaMessageId());
+    private final Consumer<BaseDto> sendAsk =
+            message -> log.info("asked, value {}:{}", message.getMessageType(), message.getId());
 
     @Override
-    public void sendMessage(KafkaMessageDto kafkaMessageDto, KafkaProducerCallback kafkaProducerCallback) {
-        kafkaMessageDto.setClusterId(kafnettyKafkaConfig.getGroupId());
-        log.info("sendMessage {}: {}", kafkaMessageDto.getMessageType(), kafkaMessageDto.toJson());
+    public void sendMessage(MessageDto channelMessageDto, KafkaProducerCallback kafkaProducerCallback) {
+        channelMessageDto.setClusterId(kafnettyKafkaConfig.getGroupId());
+        log.info("sendMessage {}: {}", channelMessageDto.getMessageType(), channelMessageDto.toJson());
         try {
-            kafnettyProducer.create(kafkaMessageDto, kafkaProducerCallback);
+            kafnettyProducer.create(channelMessageDto, kafkaProducerCallback);
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
         }
     }
 
     @Override
-    public void sendRoom(KafkaRoomDto kafkaRoomDto, KafkaProducerCallback kafkaProducerCallback) {
-        kafkaRoomDto.setClusterId(kafnettyKafkaConfig.getGroupId());
-        log.info("sendRoom {}: {}", kafkaRoomDto.getMessageType(), kafkaRoomDto.toJson());
+    public void sendRoom(RoomDto channelRoomDto, KafkaProducerCallback kafkaProducerCallback) {
+        channelRoomDto.setClusterId(kafnettyKafkaConfig.getGroupId());
+        log.info("sendRoom {}: {}", channelRoomDto.getMessageType(), channelRoomDto.toJson());
         try {
-            kafnettyProducer.create(kafkaRoomDto, kafkaProducerCallback);
+            kafnettyProducer.create(channelRoomDto, kafkaProducerCallback);
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
         }
     }
 
     @Override
-    public void sendClient(KafkaClientDto kafkaClientDto, KafkaProducerCallback kafkaProducerCallback) {
-        kafkaClientDto.setClusterId(kafnettyKafkaConfig.getGroupId());
-        log.info("sendClient {}: {}", kafkaClientDto.getMessageType(), kafkaClientDto.toJson());
+    public void sendClient(ClientDto channelClientDto, KafkaProducerCallback kafkaProducerCallback) {
+        channelClientDto.setClusterId(kafnettyKafkaConfig.getGroupId());
+        log.info("sendClient {}: {}", channelClientDto.getMessageType(), channelClientDto.toJson());
         try {
-            kafnettyProducer.create(kafkaClientDto, kafkaProducerCallback);
+            kafnettyProducer.create(channelClientDto, kafkaProducerCallback);
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
         }
