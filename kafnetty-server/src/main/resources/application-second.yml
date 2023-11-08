@@ -12,6 +12,9 @@ server:
   so:
     keepalive: true
     backlog: 100
+topic:
+  partitions: 3
+  replicas: 1
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/chatDB2
@@ -27,24 +30,31 @@ spring:
   main:
     allow-circular-references: true
   kafka:
-    topic:
-      name: KAFNETTY
+    topic: kafnetty
     group-id: kafnetty-2
+    bootstrap-servers: localhost:9092
     producer:
-      bootstrap-servers: localhost:9092
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      key-serializer: org.apache.kafka.common.serialization.UUIDSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        acks: all
+        retries: 10
+        retry.backoff.ms: 1000
     consumer:
-      bootstrap-servers: localhost:9092
-      auto-offset-reset: earliest
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      key-deserializer: org.apache.kafka.common.serialization.UUIDDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
-        spring.json.value.default.type: org.kafnetty.dto.BaseDto
-        #spring.json.trusted.packages: 'org.kafnetty.dto.kafka'
+        spring.json.trusted.packages: 'org.kafnetty.dto'
 logging:
   level:
     org:
       springframework:
         boot:
-          autoconfigure: ERROR
+          autoconfigure: error
+        kafka:
+          listener:
+            org.springframework.kafka.listener.KafkaMessageListenerContainer: error
+      kafnetty: debug
+topics:
+  retry: 'kafnetty.RETRY'
+  dlt: 'kafnetty.DLT'

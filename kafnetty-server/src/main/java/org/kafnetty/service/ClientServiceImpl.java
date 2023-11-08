@@ -5,10 +5,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.kafnetty.dto.ClientDto;
 import org.kafnetty.entity.Client;
-import org.kafnetty.kafka.config.KafnettyKafkaConfig;
+import org.kafnetty.kafka.config.KafnettyConsumerConfig;
 import org.kafnetty.mapper.ClientMapper;
 import org.kafnetty.repository.ClientRepository;
 import org.kafnetty.type.OPERATION_TYPE;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -21,7 +22,8 @@ public class ClientServiceImpl implements ClientService {
     private static final Map<String, ClientDto> CHANNEL_USERS = new ConcurrentHashMap<>();
     private final ClientRepository clientRepository;
     private final ClientMapper clientMapper;
-    private final KafnettyKafkaConfig kafnettyKafkaConfig;
+    @Autowired
+    private KafnettyConsumerConfig kafnettyConsumerConfig;
 
     private static boolean checkToken(ClientDto req) {
         return true;
@@ -81,7 +83,7 @@ public class ClientServiceImpl implements ClientService {
             client.setEmail(message.getEmail());
             client.setEmail(message.getEmail());
             client.setTs(new Date().getTime());
-            client.setSent(!kafnettyKafkaConfig.getGroupId().equals(message.getClusterId()));
+            client.setSent(!kafnettyConsumerConfig.getGroupId().equals(message.getClusterId()));
             client = clientRepository.saveAndFlush(client);
         }
         client.setRoomId(message.getRoomId());
@@ -105,7 +107,7 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public List<ClientDto> getNotSyncClients() {
-        List<Client> clients = clientRepository.findAllByIsSentAndClusterId(false, kafnettyKafkaConfig.getGroupId());
+        List<Client> clients = clientRepository.findAllByIsSentAndClusterId(false, kafnettyConsumerConfig.getGroupId());
         return clientMapper.ToClientDtoList(clients);
     }
 }

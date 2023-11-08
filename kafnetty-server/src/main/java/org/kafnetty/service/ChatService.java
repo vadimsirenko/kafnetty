@@ -1,6 +1,10 @@
 package org.kafnetty.service;
 
 import io.netty.channel.Channel;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.kafnetty.dto.BaseDto;
+
+import java.util.UUID;
 
 public interface ChatService {
 
@@ -11,4 +15,6 @@ public interface ChatService {
     boolean existsChannelUser(Channel channel);
 
     void InitChannel(Channel channel);
+
+    void processBaseDtoFromKafka(ConsumerRecord<UUID, BaseDto> consumerRecord);
 }

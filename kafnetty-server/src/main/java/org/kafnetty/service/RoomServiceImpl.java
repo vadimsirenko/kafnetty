@@ -5,10 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.kafnetty.dto.RoomDto;
 import org.kafnetty.dto.RoomListDto;
 import org.kafnetty.entity.Room;
-import org.kafnetty.kafka.config.KafnettyKafkaConfig;
+import org.kafnetty.kafka.config.KafnettyConsumerConfig;
 import org.kafnetty.mapper.RoomMapper;
 import org.kafnetty.repository.RoomRepository;
 import org.kafnetty.type.OPERATION_TYPE;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,7 +20,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 public class RoomServiceImpl implements RoomService {
-    private final KafnettyKafkaConfig kafnettyKafkaConfig;
+    @Autowired
+    private KafnettyConsumerConfig kafnettyConsumerConfig;
     private final RoomRepository roomRepository;
     private final RoomMapper roomMapper;
 
@@ -35,7 +37,7 @@ public class RoomServiceImpl implements RoomService {
             existsRoom.setName(roomDto.getName());
             room = roomRepository.saveAndFlush(existsRoom);
         } else {
-            room.setSent(!kafnettyKafkaConfig.getGroupId().equals(roomDto.getClusterId()));
+            room.setSent(!kafnettyConsumerConfig.getGroupId().equals(roomDto.getClusterId()));
             room = roomRepository.saveAndFlush(room);
         }
         return roomMapper.RoomToChannelRoomDto(room);
@@ -60,7 +62,7 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public List<RoomDto> getNotSyncRooms() {
-        List<Room> rooms = roomRepository.findAllByIsSentAndClusterId(false, kafnettyKafkaConfig.getGroupId());
+        List<Room> rooms = roomRepository.findAllByIsSentAndClusterId(false, kafnettyConsumerConfig.getGroupId());
         return roomMapper.ToRoomDtoList(rooms);
     }
 }

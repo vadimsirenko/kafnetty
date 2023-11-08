@@ -3,10 +3,13 @@ package org.kafnetty.service;
 import io.netty.channel.Channel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.kafnetty.dto.*;
-import org.kafnetty.kafka.config.KafnettyKafkaConfig;
+import org.kafnetty.kafka.config.KafnettyConsumerConfig;
+import org.kafnetty.kafka.producer.KafnettyProducer;
 import org.kafnetty.repository.ChannelRepository;
 import org.kafnetty.type.OPERATION_TYPE;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
@@ -20,9 +23,10 @@ public class ChatServiceImpl implements ChatService {
     private final ClientService clientService;
     private final MessageService messageService;
     private final RoomService roomService;
-    private final KafkaProducerService kafkaProducerService;
+    private final KafnettyProducer kafnettyProducer;
     private final ChannelRepository channelRepository;
-    private final KafnettyKafkaConfig kafnettyKafkaConfig;
+    @Autowired
+    private KafnettyConsumerConfig kafnettyConsumerConfig;
 
     private void putChannel(UUID roomId, Channel channel) {
         ClientDto clientDto = clientService.getChannelUser(channel.id().asLongText());
@@ -52,18 +56,18 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public void processMessage(String jsonMessage, Channel channel) {
         BaseDto messageDto = BaseDto.decode(jsonMessage);
-        messageDto.setClusterId(kafnettyKafkaConfig.getGroupId());
+        messageDto.setClusterId(kafnettyConsumerConfig.getGroupId());
         switch (messageDto.getMessageType()) {
             case MESSAGE -> {
                 MessageDto channelMessageDto = messageService.processMessage((MessageDto) messageDto);
                 channelRepository.sendToRoom(clientService.getChannelUser(channel.id().asLongText()).getRoomId(), channelMessageDto);
-                kafkaProducerService.sendMessage(channelMessageDto,
+                kafnettyProducer.sendMessage(channelMessageDto,
                         dto -> messageService.setMessageAsSended((MessageDto) dto));
             }
             case ROOM -> {
                 RoomDto channelRoomDto = roomService.processMessage((RoomDto) messageDto);
-                channelRepository.sendToRoom(clientService.getChannelUser(channel.id().asLongText()).getRoomId(), channelRoomDto);
-                kafkaProducerService.sendRoom(channelRoomDto,
+                channelRepository.sendToAllRoom(channelRoomDto);
+                kafnettyProducer.sendMessage(channelRoomDto,
                         dto -> roomService.setRoomAsSended((RoomDto) dto));
             }
             case MESSAGE_LIST -> {
@@ -76,7 +80,7 @@ public class ChatServiceImpl implements ChatService {
                 putChannel(channelClientDto.getRoomId(), channel);
                 if (channelClientDto.getOperationType() == OPERATION_TYPE.UPDATE ||
                         channelClientDto.getOperationType() == OPERATION_TYPE.CREATE) {
-                    kafkaProducerService.sendClient(channelClientDto,
+                    kafnettyProducer.sendMessage(channelClientDto,
                             dto -> clientService.setClientAsSended((ClientDto) dto));
                 }
                 channelClientDto.writeAndFlush(channel);
@@ -102,18 +106,43 @@ public class ChatServiceImpl implements ChatService {
         }
     }
 
+    @Override
+    public void processBaseDtoFromKafka(ConsumerRecord<UUID, BaseDto> consumerRecord) {
+        BaseDto message = consumerRecord.value();
+        log.info("receive value : {} ", message.toJson());
+        if (message instanceof MessageDto) {
+
+            if (!message.getClusterId().equals(kafnettyConsumerConfig.getGroupId())) {
+                MessageDto channelMessageDto = (MessageDto) message;
+                messageService.processMessage(channelMessageDto);
+                channelRepository.sendToRoom(channelMessageDto.getRoomId(), channelMessageDto);
+            }
+        } else if (message instanceof RoomDto) {
+            if (!message.getClusterId().equals(kafnettyConsumerConfig.getGroupId())) {
+                RoomDto channelRoomDto = (RoomDto) message;
+                roomService.processMessage(channelRoomDto);
+                channelRepository.sendToAllRoom(channelRoomDto);
+            }
+        } else if (message instanceof ClientDto) {
+            if (!message.getClusterId().equals(kafnettyConsumerConfig.getGroupId())) {
+                ClientDto channelClientDto = (ClientDto) message;
+                clientService.processMessage(channelClientDto, null);
+            }
+        }
+    }
+
     @EventListener(ApplicationReadyEvent.class)
     public void syncObjectCollections() {
         for (ClientDto channelClientDto : clientService.getNotSyncClients()) {
-            kafkaProducerService.sendClient(channelClientDto,
+            kafnettyProducer.sendMessage(channelClientDto,
                     dto -> clientService.setClientAsSended((ClientDto) dto));
         }
         for (RoomDto channelRoomDto : roomService.getNotSyncRooms()) {
-            kafkaProducerService.sendRoom(channelRoomDto,
+            kafnettyProducer.sendMessage(channelRoomDto,
                     dto -> roomService.setRoomAsSended((RoomDto) dto));
         }
         for (MessageDto channelMessageDto : messageService.getNotSyncMessages()) {
-            kafkaProducerService.sendMessage(channelMessageDto,
+            kafnettyProducer.sendMessage(channelMessageDto,
                     dto -> messageService.setMessageAsSended((MessageDto) dto));
         }
     }
