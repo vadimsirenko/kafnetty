@@ -18,8 +18,8 @@ public interface ClientMapper {
     ClientDto ClientToChannelClientDto(Client client);
 
     @Mapping(ignore = true, target = "sent")
-    Client ChannelClientDtoToClient(ClientDto clientDto);
+    Client ClientDtoToClient(ClientDto clientDto);
 
-    List<ClientDto> mapToChannelClientDtoList(List<Client> clients);
+    List<ClientDto> ToClientDtoList(List<Client> clients);
 }
 

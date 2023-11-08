@@ -6,9 +6,6 @@ import org.kafnetty.dto.BaseDto;
 import org.kafnetty.dto.ClientDto;
 import org.kafnetty.dto.MessageDto;
 import org.kafnetty.dto.RoomDto;
-import org.kafnetty.mapper.ClientMapper;
-import org.kafnetty.mapper.MessageMapper;
-import org.kafnetty.mapper.RoomMapper;
 import org.kafnetty.repository.ChannelRepository;
 import org.kafnetty.service.ClientService;
 import org.kafnetty.service.MessageService;
@@ -21,9 +18,6 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @RequiredArgsConstructor
 public class KafnettyConsumer {
-    private final MessageMapper messageMapper;
-    private final RoomMapper roomMapper;
-    private final ClientMapper clientMapper;
     private final MessageService messageService;
     private final RoomService roomService;
     private final ClientService clientService;

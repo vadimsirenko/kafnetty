@@ -18,8 +18,8 @@ public interface MessageMapper {
     MessageDto MessageToChannelMessageDto(Message message);
 
     @Mapping(ignore = true, target = "sent")
-    Message ChannelMessageDtoToMessage(MessageDto channelMessageDto);
+    Message MessageDtoToMessage(MessageDto channelMessageDto);
 
-    List<MessageDto> mapToChannelMessageDtoList(List<Message> clients);
+    List<MessageDto> ToMessageDtoList(List<Message> clients);
 }
 

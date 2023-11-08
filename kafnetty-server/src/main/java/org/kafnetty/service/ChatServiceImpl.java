@@ -24,8 +24,7 @@ public class ChatServiceImpl implements ChatService {
     private final ChannelRepository channelRepository;
     private final KafnettyKafkaConfig kafnettyKafkaConfig;
 
-    @Override
-    public void putChannel(UUID roomId, Channel channel) {
+    private void putChannel(UUID roomId, Channel channel) {
         ClientDto clientDto = clientService.getChannelUser(channel.id().asLongText());
         UUID oldRoomId = (clientDto != null) ? clientDto.getRoomId() : null;
         channelRepository.changeRoom(roomId, oldRoomId, channel
@@ -68,7 +67,7 @@ public class ChatServiceImpl implements ChatService {
                         dto -> roomService.setRoomAsSended((RoomDto) dto));
             }
             case MESSAGE_LIST -> {
-                MessageListDto channelMessageListDto = messageService.processMessageList((MessageListDto) messageDto, channel);
+                MessageListDto channelMessageListDto = messageService.processMessageList((MessageListDto) messageDto);
                 putChannel(channelMessageListDto.getRoomId(), channel);
                 channelMessageListDto.writeAndFlush(channel);
             }

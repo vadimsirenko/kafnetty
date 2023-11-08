@@ -25,7 +25,7 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public RoomDto processMessage(RoomDto roomDto) {
-        Room room = roomMapper.ChannelRoomDtoToRoom(roomDto);
+        Room room = roomMapper.RoomDtoToRoom(roomDto);
         if (room == null)
             throw new RuntimeException("Message is not valid");
         Room existsRoom = roomRepository.findByName(room.getName());
@@ -61,6 +61,6 @@ public class RoomServiceImpl implements RoomService {
     @Override
     public List<RoomDto> getNotSyncRooms() {
         List<Room> rooms = roomRepository.findAllByIsSentAndClusterId(false, kafnettyKafkaConfig.getGroupId());
-        return roomMapper.mapToChannelRoomDtoList(rooms);
+        return roomMapper.ToRoomDtoList(rooms);
     }
 }

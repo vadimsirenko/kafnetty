@@ -19,9 +19,6 @@ import java.util.function.Consumer;
 public class KafkaProducerServiceImpl implements KafkaProducerService {
     private final KafnettyKafkaConfig kafnettyKafkaConfig;
     private final KafnettyProducer kafnettyProducer;
-    private final Consumer<BaseDto> sendAsk =
-            message -> log.info("asked, value {}:{}", message.getMessageType(), message.getId());
-
     @Override
     public void sendMessage(MessageDto channelMessageDto, KafkaProducerCallback kafkaProducerCallback) {
         channelMessageDto.setClusterId(kafnettyKafkaConfig.getGroupId());

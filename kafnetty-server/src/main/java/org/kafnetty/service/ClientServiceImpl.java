@@ -106,7 +106,7 @@ public class ClientServiceImpl implements ClientService {
     @Override
     public List<ClientDto> getNotSyncClients() {
         List<Client> clients = clientRepository.findAllByIsSentAndClusterId(false, kafnettyKafkaConfig.getGroupId());
-        return clientMapper.mapToChannelClientDtoList(clients);
+        return clientMapper.ToClientDtoList(clients);
     }
 }
 

@@ -6,7 +6,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.lang.NonNull;
 
 import java.util.UUID;
 
@@ -16,7 +15,7 @@ import java.util.UUID;
 @Table(name = "message")
 public class Message {
     @Id
-    @NonNull
+    @Column(name = "id", nullable = false)
     private UUID id;
     @Column(name = "cluster_id", nullable = false)
     private String clusterId;

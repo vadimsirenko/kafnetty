@@ -28,8 +28,7 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 @Slf4j
 public class HttpRequestServiceImpl implements HttpRequestService {
     private final HttpResponseProcessor httpResponseProcessor;
-    @Autowired
-    private ChatService chatService;
+    private final ChatService chatService;
     @Value("${server.web-socket-path}")
     private String webSocketPath;
     @Value("${server.static-path}")

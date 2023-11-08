@@ -1,4 +1,4 @@
-TRUNCATE TABLE client;
+TRUNCATE TABLE public.client;
 INSERT INTO client(id, cluster_id, login, nick_name, email, token, is_sent)
 VALUES ('a5461723-b1de-4351-a2f0-94bc2e1a2f92', 'test-1', 'vadim', 'Вадим', 'vadim@mail.ru', '1234567', true),
        ('f9b26b13-6a8e-41e0-9332-9b14eaa6d60a', 'test-1', 'sergey', 'Сергей', 'sergey@mail.ru', '1234567', true),

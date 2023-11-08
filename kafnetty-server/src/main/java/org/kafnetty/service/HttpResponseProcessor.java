@@ -37,10 +37,10 @@ public class HttpResponseProcessor {
             resourcePath = resourcePath.substring(1);
         }
         Resource resource = resourceLoader.getResource("classpath:" + resourcePath);
-        InputStream inputStream = null;
+        InputStream inputStream;
         try {
             inputStream = resource.getInputStream();
-            HttpHeaders headers = null;
+            HttpHeaders headers;
             headers = getContentTypeHeader(resourcePath);
             // Write the initial line and the header.
             HttpResponse response = new DefaultHttpResponse(request.protocolVersion(), HttpResponseStatus.OK, headers);

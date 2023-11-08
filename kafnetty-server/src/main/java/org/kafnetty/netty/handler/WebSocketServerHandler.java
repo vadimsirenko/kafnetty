@@ -3,6 +3,7 @@ package org.kafnetty.netty.handler;
 import io.netty.channel.*;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.websocketx.*;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.kafnetty.service.HttpRequestService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,11 +15,11 @@ import static io.netty.handler.codec.http.HttpHeaderNames.HOST;
 @Component
 @ChannelHandler.Sharable
 @Qualifier("webSocketServerHandler")
+@RequiredArgsConstructor
 @Slf4j
 public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> {
     private static final String WEBSOCKET_PATH = "/websocket";
-    @Autowired
-    private HttpRequestService httpRequestService;
+    private final HttpRequestService httpRequestService;
     private WebSocketServerHandshaker handshaker;
 
     private static String getWebSocketLocation(HttpRequest req) {
@@ -77,13 +78,13 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
     }
 
     @Override
-    public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
+    public void handlerAdded(ChannelHandlerContext ctx) {
         Channel incoming = ctx.channel();
         System.out.println("Received " + incoming.remoteAddress() + " handshake request");
     }
 
     @Override
-    public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
+    public void handlerRemoved(ChannelHandlerContext ctx) {
         httpRequestService.removeChannel(ctx.channel());
     }
 }

@@ -24,7 +24,7 @@ public class KafnettyProducerImpl implements KafnettyProducer {
     private final KafkaTemplate<String, BaseDto> kafkaTemplate;
 
     @Override
-    public boolean create(BaseDto kafkaBaseDto, KafkaProducerCallback successCallback) {
+    public void create(BaseDto kafkaBaseDto, KafkaProducerCallback successCallback) {
         log.info("Attempting to log {} to topic {}.", kafkaBaseDto, kafnettyKafkaConfig.getTopicName());
         final String key = kafkaBaseDto.getId().toString();
         try {
@@ -32,10 +32,8 @@ public class KafnettyProducerImpl implements KafnettyProducer {
                     .send(kafnettyKafkaConfig.getTopicName(), key, kafkaBaseDto)
                     .get(10, TimeUnit.SECONDS);
             onSuccess(result, successCallback);
-            return true;
         } catch (ExecutionException | InterruptedException | TimeoutException e) {
             onFailure(e);
-            return false;
         }
     }
 

@@ -42,7 +42,6 @@ bin/
 .DS_Store
 
 # Ignore Gradle project-specific cache directory
-.gradle
 /gradlew.bat
 /buildSrc/.gradle/
 /gradlew

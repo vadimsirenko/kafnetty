@@ -19,8 +19,8 @@ public interface RoomMapper {
     RoomDto RoomToChannelRoomDto(Room room);
 
     @Mapping(ignore = true, target = "sent")
-    Room ChannelRoomDtoToRoom(RoomDto channelRoomDto);
+    Room RoomDtoToRoom(RoomDto channelRoomDto);
 
-    List<RoomDto> mapToChannelRoomDtoList(List<Room> clients);
+    List<RoomDto> ToRoomDtoList(List<Room> clients);
 }
 

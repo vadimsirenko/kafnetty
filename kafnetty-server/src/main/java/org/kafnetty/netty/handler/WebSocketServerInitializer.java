@@ -7,6 +7,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -14,14 +15,13 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Qualifier("webSocketServerInitializer")
+@RequiredArgsConstructor
 @Slf4j
 public class WebSocketServerInitializer extends ChannelInitializer<SocketChannel> {
-    @Autowired
-    @Qualifier("webSocketServerHandler")
-    private ChannelInboundHandlerAdapter channelInboundHandlerAdapter;
+    private final ChannelInboundHandlerAdapter channelInboundHandlerAdapter;
 
     @Override
-    public void initChannel(SocketChannel ch) throws Exception {
+    public void initChannel(SocketChannel ch) {
         ChannelPipeline pipeline = ch.pipeline();
 
         pipeline.addLast(new HttpServerCodec());
