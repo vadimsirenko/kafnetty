@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.kafnetty.dto.BaseDto;
 import org.kafnetty.service.ChatService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
@@ -25,7 +24,7 @@ public class KafnettyConsumer {
     }
 
     /**
-     *  ----- consumer group and partition with intial offset  ----
+     *  ----- consumer group and partition with initial offset  ----
      *
     @KafkaListener(groupId = "inventory-consumer-group-1",
             topicPartitions = @TopicPartition(topic = "inventory-events",
@@ -33,13 +32,13 @@ public class KafnettyConsumer {
                             @PartitionOffset(partition = "0", initialOffset = "0"),
                             @PartitionOffset(partition = "2", initialOffset = "0")}))
      */
-    public void onMessage_PartitionIntialOffset(ConsumerRecord<UUID, BaseDto> consumerRecord) {
+    public void onMessage_PartitionInitialOffset(ConsumerRecord<UUID, BaseDto> consumerRecord) {
         log.info("Consumer Record: {}", consumerRecord);
     }
 
 
     /**
-     * ----- consumer group and partition with no intial offset  ----
+     * ----- consumer group and partition with no initial offset  ----
      *
     @KafkaListener(topicPartitions = @TopicPartition(topic = "inventory-events", partitions = { "0", "1" }))
      */

@@ -49,7 +49,7 @@ public final class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public void setMessageAsSended(MessageDto channelMessageDto) {
+    public void setMessageAsSent(MessageDto channelMessageDto) {
         Optional<Message> messageOptional = messageRepository.findById(channelMessageDto.getId());
         if (messageOptional.isPresent()) {
             Message message = messageOptional.get();

@@ -24,7 +24,7 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class HttpResponseProcessor {
+public class HttpResponseProcessorServiceImpl implements HttpResponseProcessorService{
     private static final Tika tika = new Tika();
     private final ResourceLoader resourceLoader;
 

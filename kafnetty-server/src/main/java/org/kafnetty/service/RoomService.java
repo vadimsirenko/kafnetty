@@ -11,7 +11,7 @@ public interface RoomService {
 
     RoomListDto getRoomList(UUID clientId);
 
-    void setRoomAsSended(RoomDto channelRoomDto);
+    void setRoomAsSent(RoomDto channelRoomDto);
 
     List<RoomDto> getNotSyncRooms();
 }

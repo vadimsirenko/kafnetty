@@ -17,7 +17,7 @@ public interface ClientService {
 
     ClientDto processMessage(ClientDto message, Channel channel);
 
-    void setClientAsSended(ClientDto channelClientDto);
+    void setClientAsSent(ClientDto channelClientDto);
 
     List<ClientDto> getNotSyncClients();
 }

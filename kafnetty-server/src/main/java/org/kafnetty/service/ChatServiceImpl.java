@@ -62,13 +62,13 @@ public class ChatServiceImpl implements ChatService {
                 MessageDto channelMessageDto = messageService.processMessage((MessageDto) messageDto);
                 channelRepository.sendToRoom(clientService.getChannelUser(channel.id().asLongText()).getRoomId(), channelMessageDto);
                 kafnettyProducer.sendMessage(channelMessageDto,
-                        dto -> messageService.setMessageAsSended((MessageDto) dto));
+                        dto -> messageService.setMessageAsSent((MessageDto) dto));
             }
             case ROOM -> {
                 RoomDto channelRoomDto = roomService.processMessage((RoomDto) messageDto);
                 channelRepository.sendToAllRoom(channelRoomDto);
                 kafnettyProducer.sendMessage(channelRoomDto,
-                        dto -> roomService.setRoomAsSended((RoomDto) dto));
+                        dto -> roomService.setRoomAsSent((RoomDto) dto));
             }
             case MESSAGE_LIST -> {
                 MessageListDto channelMessageListDto = messageService.processMessageList((MessageListDto) messageDto);
@@ -81,7 +81,7 @@ public class ChatServiceImpl implements ChatService {
                 if (channelClientDto.getOperationType() == OPERATION_TYPE.UPDATE ||
                         channelClientDto.getOperationType() == OPERATION_TYPE.CREATE) {
                     kafnettyProducer.sendMessage(channelClientDto,
-                            dto -> clientService.setClientAsSended((ClientDto) dto));
+                            dto -> clientService.setClientAsSent((ClientDto) dto));
                 }
                 channelClientDto.writeAndFlush(channel);
             }
@@ -135,15 +135,15 @@ public class ChatServiceImpl implements ChatService {
     public void syncObjectCollections() {
         for (ClientDto channelClientDto : clientService.getNotSyncClients()) {
             kafnettyProducer.sendMessage(channelClientDto,
-                    dto -> clientService.setClientAsSended((ClientDto) dto));
+                    dto -> clientService.setClientAsSent((ClientDto) dto));
         }
         for (RoomDto channelRoomDto : roomService.getNotSyncRooms()) {
             kafnettyProducer.sendMessage(channelRoomDto,
-                    dto -> roomService.setRoomAsSended((RoomDto) dto));
+                    dto -> roomService.setRoomAsSent((RoomDto) dto));
         }
         for (MessageDto channelMessageDto : messageService.getNotSyncMessages()) {
             kafnettyProducer.sendMessage(channelMessageDto,
-                    dto -> messageService.setMessageAsSended((MessageDto) dto));
+                    dto -> messageService.setMessageAsSent((MessageDto) dto));
         }
     }
 }

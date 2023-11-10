@@ -51,7 +51,7 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public void setRoomAsSended(RoomDto channelRoomDto) {
+    public void setRoomAsSent(RoomDto channelRoomDto) {
         Optional<Room> roomOptional = roomRepository.findById(channelRoomDto.getId());
         if (roomOptional.isPresent()) {
             Room room = roomOptional.get();

@@ -10,7 +10,7 @@ public interface MessageService {
 
     MessageListDto processMessageList(MessageListDto message);
 
-    void setMessageAsSended(MessageDto message);
+    void setMessageAsSent(MessageDto message);
 
     List<MessageDto> getNotSyncMessages();
 }

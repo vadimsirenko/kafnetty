@@ -10,7 +10,6 @@ import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.kafnetty.dto.ErrorDto;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -27,7 +26,7 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 @RequiredArgsConstructor
 @Slf4j
 public class HttpRequestServiceImpl implements HttpRequestService {
-    private final HttpResponseProcessor httpResponseProcessor;
+    private final HttpResponseProcessorService httpResponseProcessorService;
     private final ChatService chatService;
     @Value("${server.web-socket-path}")
     private String webSocketPath;
@@ -54,40 +53,40 @@ public class HttpRequestServiceImpl implements HttpRequestService {
         try {
             // Handle a bad request.
             if (!request.decoderResult().isSuccess()) {
-                httpResponseProcessor.sendHttpResponse(ctx, request, new DefaultFullHttpResponse(HTTP_1_1, BAD_REQUEST));
+                httpResponseProcessorService.sendHttpResponse(ctx, request, new DefaultFullHttpResponse(HTTP_1_1, BAD_REQUEST));
                 return false;
             }
             System.out.println(request.uri());
             // Allow only GET methods.
             if (request.method() != GET) {
-                httpResponseProcessor.sendHttpResponse(ctx, request, new DefaultFullHttpResponse(HTTP_1_1, FORBIDDEN));
+                httpResponseProcessorService.sendHttpResponse(ctx, request, new DefaultFullHttpResponse(HTTP_1_1, FORBIDDEN));
                 return false;
             }
             if ("/favicon.ico".equals(request.uri()) || "/".equals(request.uri())) {
                 System.out.println("not fount! : " + request.uri());
-                httpResponseProcessor.sendHttpResponse(ctx, request, new DefaultFullHttpResponse(HTTP_1_1, NOT_FOUND));
+                httpResponseProcessorService.sendHttpResponse(ctx, request, new DefaultFullHttpResponse(HTTP_1_1, NOT_FOUND));
                 return false;
             }
 
             if (request.uri().startsWith(staticPath) || request.uri().startsWith(chatPath)) {
-                httpResponseProcessor.handleResource(ctx, request, request.uri().substring(1));
+                httpResponseProcessorService.handleResource(ctx, request, request.uri().substring(1));
                 return false;
             }
             if (!request.uri().startsWith(webSocketPath)) {
-                httpResponseProcessor.handleResource(ctx, request, request.uri().substring(1));
+                httpResponseProcessorService.handleResource(ctx, request, request.uri().substring(1));
                 return false;
             }
             Map<String, List<String>> requestParams = new QueryStringDecoder(request.uri()).parameters();
 
             if (requestParams.isEmpty() || !requestParams.containsKey(HTTP_PARAM_REQUEST)) {
-                httpResponseProcessor.handleResource(ctx, request, request.uri().substring(1));
+                httpResponseProcessorService.handleResource(ctx, request, request.uri().substring(1));
                 return false;
             }
             String jsonMessage = new String(Base64.getDecoder().decode(requestParams.get(HTTP_PARAM_REQUEST).get(0)), StandardCharsets.UTF_8);
             chatService.processMessage(jsonMessage, ctx.channel());
             return true;
         } catch (RuntimeException ex) {
-            httpResponseProcessor.sendHttpResponse(ctx, request, new DefaultFullHttpResponse(HTTP_1_1, NOT_FOUND));
+            httpResponseProcessorService.sendHttpResponse(ctx, request, new DefaultFullHttpResponse(HTTP_1_1, NOT_FOUND));
             log.error("error at process Http request", ex);
             return false;
         }

@@ -96,7 +96,7 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    public void setClientAsSended(ClientDto channelClientDto) {
+    public void setClientAsSent(ClientDto channelClientDto) {
         Optional<Client> clientOptional = clientRepository.findById(channelClientDto.getId());
         if (clientOptional.isPresent()) {
             Client client = clientOptional.get();

@@ -96,10 +96,8 @@ public class KafnettyConsumerConfig {
 
         exceptionsToIgnoreList.forEach(errorHandler::addNotRetryableExceptions);
 
-        errorHandler.setRetryListeners((consumerRecord, ex, deliveryAttempt) -> {
-            log.info("Failed Record in Retry Listener, Exception: {}, deliveryAttempt: {}",
-                    ex.getMessage(), deliveryAttempt);
-        });
+        errorHandler.setRetryListeners((consumerRecord, ex, deliveryAttempt) ->
+                log.info("Failed Record in Retry Listener, Exception: {}, deliveryAttempt: {}", ex.getMessage(), deliveryAttempt));
 
         return errorHandler;
     }
