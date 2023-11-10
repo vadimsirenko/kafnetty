@@ -28,5 +28,5 @@ public class Client {
     private UUID roomId;
     private Long ts;
     @Column(name = "is_sent")
-    private boolean isSent = false;
+    private boolean sent = false;
 }

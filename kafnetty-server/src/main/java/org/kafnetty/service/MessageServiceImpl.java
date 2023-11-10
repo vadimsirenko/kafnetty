@@ -60,7 +60,7 @@ public final class MessageServiceImpl implements MessageService {
 
     @Override
     public List<MessageDto> getNotSyncMessages() {
-        List<Message> messages = messageRepository.findAllByIsSentAndClusterId(false, kafnettyConsumerConfig.getGroupId());
+        List<Message> messages = messageRepository.findBySentAndClusterId(false, kafnettyConsumerConfig.getGroupId());
         return messageMapper.ToMessageDtoList(messages);
     }
 }

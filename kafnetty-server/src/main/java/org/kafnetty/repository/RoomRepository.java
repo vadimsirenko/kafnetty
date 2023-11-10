@@ -11,5 +11,5 @@ import java.util.UUID;
 public interface RoomRepository extends JpaRepository<Room, UUID> {
     Room findByName(String name);
 
-    List<Room> findAllByIsSentAndClusterId(boolean isSent, String clusterId);
+    List<Room> findBySentAndClusterId(boolean isSent, String clusterId);
 }

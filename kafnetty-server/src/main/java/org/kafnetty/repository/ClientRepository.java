@@ -12,5 +12,5 @@ import java.util.UUID;
 public interface ClientRepository extends JpaRepository<Client, UUID> {
     Optional<Client> findByLogin(String login);
 
-    List<Client> findAllByIsSentAndClusterId(boolean isSent, String clusterId);
+    List<Client> findBySentAndClusterId(boolean isSent, String clusterId);
 }

@@ -62,7 +62,7 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public List<RoomDto> getNotSyncRooms() {
-        List<Room> rooms = roomRepository.findAllByIsSentAndClusterId(false, kafnettyConsumerConfig.getGroupId());
+        List<Room> rooms = roomRepository.findBySentAndClusterId(false, kafnettyConsumerConfig.getGroupId());
         return roomMapper.ToRoomDtoList(rooms);
     }
 }

@@ -21,5 +21,5 @@ public class Room {
     @Transient
     private long messageCount;
     @Column(name = "is_sent")
-    private boolean isSent = false;
+    private boolean sent = false;
 }

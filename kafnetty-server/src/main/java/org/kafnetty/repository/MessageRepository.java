@@ -11,5 +11,5 @@ import java.util.UUID;
 public interface MessageRepository extends JpaRepository<Message, UUID> {
     List<Message> findByRoomIdOrderByTs(UUID roomId);
 
-    List<Message> findAllByIsSentAndClusterId(boolean isSent, String clusterId);
+    List<Message> findBySentAndClusterId(boolean isSent, String clusterId);
 }

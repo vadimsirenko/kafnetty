@@ -28,5 +28,5 @@ public class Message {
     private Long ts;
     private String sender;
     @Column(name = "is_sent")
-    private boolean isSent = false;
+    private boolean sent = false;
 }
