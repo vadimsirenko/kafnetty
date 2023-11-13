@@ -74,3 +74,4 @@ WebBrowser -> WebSocket -> Kafka -> WebSocket -> WebBrowser
 - [X] Сохранение профиля пользователя из Kafka в БД
 - [X] Создание процесса передачи не переданных сообщений (из-за отсутствия связи) в Kafka
 - [X] Error Handling and Recovery, Acknowledgement and Retry
+- [X] Защита проектной работы
