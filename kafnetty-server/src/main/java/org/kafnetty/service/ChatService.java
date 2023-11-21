@@ -10,7 +10,7 @@ public interface ChatService {
 
     void removeChannel(Channel channel);
 
-    void processMessage(String jsonMessage, Channel channel);
+    void processMessage(BaseDto messageDto, Channel channel);
 
     boolean existsChannelUser(Channel channel);
 

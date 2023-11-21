@@ -16,7 +16,7 @@ public class KafnettyServer {
     private final InetSocketAddress tcpPort;
 
     public void start() throws Exception {
-        ChannelFuture f = serverBootstrap.bind(tcpPort).sync();
-        f.channel().closeFuture().sync();
+        ChannelFuture future = serverBootstrap.bind(tcpPort).sync();
+        future.channel().closeFuture().sync();
     }
 }

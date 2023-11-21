@@ -1,7 +1,6 @@
 package org.kafnetty.service;
 
 import io.netty.channel.Channel;
-import io.netty.util.AttributeKey;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -17,6 +16,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
+import static org.kafnetty.netty.handler.http.HttpServerHandler.CLIENT_ATTR_KEY;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -28,7 +29,6 @@ public class ChatServiceImpl implements ChatService {
     private final ChannelRepository channelRepository;
     @Autowired
     private KafnettyConsumerConfig kafnettyConsumerConfig;
-    public static AttributeKey<ClientDto> CLIENT_ATTRIBUTE_KEY = AttributeKey.valueOf("client");
 
     private void putChannel(UUID roomId, Channel channel) {
         ClientDto clientDto = clientService.getChannelUser(channel.id().asLongText());
@@ -56,8 +56,7 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public void processMessage(String jsonMessage, Channel channel) {
-        BaseDto messageDto = BaseDto.decode(jsonMessage);
+    public void processMessage(BaseDto messageDto, Channel channel) {
         messageDto.setClusterId(kafnettyConsumerConfig.getGroupId());
         switch (messageDto.getMessageType()) {
             case MESSAGE -> {
@@ -106,7 +105,7 @@ public class ChatServiceImpl implements ChatService {
             roomService.getRoomList(clientDto.getId()).writeAndFlush(channel);
             clientDto.writeAndFlush(channel);
         }
-        channel.attr(CLIENT_ATTRIBUTE_KEY).set(clientDto);
+        channel.attr(CLIENT_ATTR_KEY).set(clientDto);
     }
 
     @Override

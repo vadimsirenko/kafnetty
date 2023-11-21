@@ -1,13 +1,13 @@
 package org.kafnetty.netty.handler.http;
 
 import io.netty.channel.*;
-import io.netty.handler.codec.http.DefaultFullHttpResponse;
-import io.netty.handler.codec.http.HttpRequest;
-import io.netty.handler.codec.http.QueryStringDecoder;
+import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.websocketx.*;
 import io.netty.util.AttributeKey;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.kafnetty.dto.BaseDto;
+import org.kafnetty.dto.ClientDto;
 import org.kafnetty.netty.handler.websocket.BaseWebSocketServerHandler;
 import org.kafnetty.service.ChatService;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -18,7 +18,7 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
-import static io.netty.handler.codec.http.HttpHeaderNames.HOST;
+import static io.netty.handler.codec.http.HttpHeaderNames.*;
 import static io.netty.handler.codec.http.HttpMethod.GET;
 import static io.netty.handler.codec.http.HttpResponseStatus.*;
 import static io.netty.handler.codec.http.HttpResponseStatus.NOT_FOUND;
@@ -30,8 +30,9 @@ import static org.kafnetty.config.ServerConstants.*;
 @Qualifier("httpServerHandler")
 @RequiredArgsConstructor
 @Slf4j
-public class HttpServerHandler extends BaseWebSocketServerHandler<HttpRequest> {
+public class HttpServerHandler extends BaseWebSocketServerHandler<FullHttpRequest> {
     protected static final AttributeKey<WebSocketServerHandshaker> HANDSHAKER_ATTR_KEY = AttributeKey.valueOf(WebSocketServerHandshaker.class, "HANDSHAKER");
+    public static final AttributeKey<ClientDto> CLIENT_ATTR_KEY = AttributeKey.valueOf("CLIENT");
 
     private final ChatService chatService;
     private final HttpProcessor httpProcessor;
@@ -40,7 +41,7 @@ public class HttpServerHandler extends BaseWebSocketServerHandler<HttpRequest> {
         return "ws://" + location;
     }
     @Override
-    public void channelRead0(ChannelHandlerContext ctx, HttpRequest httpRequest) {
+    public void channelRead0(ChannelHandlerContext ctx, FullHttpRequest httpRequest) {
         if (processHttpRequest(ctx, httpRequest)) {
             // Handshake
             WebSocketServerHandshakerFactory wsFactory = new WebSocketServerHandshakerFactory(getWebSocketLocation(httpRequest), null, true);
@@ -57,41 +58,44 @@ public class HttpServerHandler extends BaseWebSocketServerHandler<HttpRequest> {
             }
         }
     }
-    public boolean processHttpRequest(ChannelHandlerContext ctx, HttpRequest request) {
+    public boolean processHttpRequest(ChannelHandlerContext ctx, FullHttpRequest request) {
         try {
             // Handle a bad request.
             if (!request.decoderResult().isSuccess()) {
                 httpProcessor.sendHttpResponse(ctx, request, new DefaultFullHttpResponse(HTTP_1_1, BAD_REQUEST));
                 return false;
             }
-            System.out.println(request.uri());
-            // Allow only GET methods.
-            if (request.method() != GET) {
+            // GET methods.
+            if (request.method() == GET){
+                if ("/favicon.ico".equals(request.uri()) || "/".equals(request.uri())) {
+                    System.out.println("not fount! : " + request.uri());
+                    httpProcessor.sendHttpResponse(ctx, request, new DefaultFullHttpResponse(HTTP_1_1, NOT_FOUND));
+                    return false;
+                }
+                if (request.uri().startsWith(STATIC_CONTENT_PATH) || request.uri().startsWith(CHAT_PATH)) {
+                    httpProcessor.handleResource(ctx, request, request.uri().substring(1));
+                    return false;
+                }
+                if (!request.uri().startsWith(WEBSOCKET_PATH)) {
+                    return false;
+                }
+
+                Map<String, List<String>> requestParams = new QueryStringDecoder(request.uri()).parameters();
+
+                if (requestParams.isEmpty() || !requestParams.containsKey(HTTP_PARAM_REQUEST)) {
+                    httpProcessor.handleResource(ctx, request, request.uri().substring(1));
+                    return false;
+                }
+                // TODO Реализовать authentication
+                String jsonMessage = new String(Base64.getDecoder().decode(requestParams.get(HTTP_PARAM_REQUEST).get(0)), StandardCharsets.UTF_8);
+                chatService.processMessage(BaseDto.decode(jsonMessage), ctx.channel());
+                setClientToContext(ctx.channel(), (ClientDto)ClientDto.decode(jsonMessage));
+                return true;
+
+            } else{
                 httpProcessor.sendHttpResponse(ctx, request, new DefaultFullHttpResponse(HTTP_1_1, FORBIDDEN));
                 return false;
             }
-            if ("/favicon.ico".equals(request.uri()) || "/".equals(request.uri())) {
-                System.out.println("not fount! : " + request.uri());
-                httpProcessor.sendHttpResponse(ctx, request, new DefaultFullHttpResponse(HTTP_1_1, NOT_FOUND));
-                return false;
-            }
-
-            if (request.uri().startsWith(STATIC_CONTENT_PATH) || request.uri().startsWith(CHAT_PATH)) {
-                httpProcessor.handleResource(ctx, request, request.uri().substring(1));
-                return false;
-            }
-            if (!request.uri().startsWith(WEBSOCKET_PATH)) {
-                return false;
-            }
-            Map<String, List<String>> requestParams = new QueryStringDecoder(request.uri()).parameters();
-
-            if (requestParams.isEmpty() || !requestParams.containsKey(HTTP_PARAM_REQUEST)) {
-                httpProcessor.handleResource(ctx, request, request.uri().substring(1));
-                return false;
-            }
-            String jsonMessage = new String(Base64.getDecoder().decode(requestParams.get(HTTP_PARAM_REQUEST).get(0)), StandardCharsets.UTF_8);
-            chatService.processMessage(jsonMessage, ctx.channel());
-            return true;
         } catch (RuntimeException ex) {
             httpProcessor.sendHttpResponse(ctx, request, new DefaultFullHttpResponse(HTTP_1_1, NOT_FOUND));
             log.error("error at process Http request", ex);
@@ -103,5 +107,11 @@ public class HttpServerHandler extends BaseWebSocketServerHandler<HttpRequest> {
     }
     private static void setHandshaker(Channel channel, WebSocketServerHandshaker handshaker) {
         channel.attr(HANDSHAKER_ATTR_KEY).set(handshaker);
+    }
+    private static void setClientToContext(Channel channel, ClientDto clientDto) {
+        channel.attr(CLIENT_ATTR_KEY).set(clientDto);
+    }
+    public static ClientDto getClientFromContext(Channel channel) {
+        return channel.attr(CLIENT_ATTR_KEY).get();
     }
 }
