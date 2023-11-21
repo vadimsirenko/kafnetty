@@ -1,6 +1,7 @@
 package org.kafnetty.service;
 
 import io.netty.channel.Channel;
+import io.netty.util.AttributeKey;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -27,6 +28,7 @@ public class ChatServiceImpl implements ChatService {
     private final ChannelRepository channelRepository;
     @Autowired
     private KafnettyConsumerConfig kafnettyConsumerConfig;
+    public static AttributeKey<ClientDto> CLIENT_ATTRIBUTE_KEY = AttributeKey.valueOf("client");
 
     private void putChannel(UUID roomId, Channel channel) {
         ClientDto clientDto = clientService.getChannelUser(channel.id().asLongText());
@@ -104,6 +106,7 @@ public class ChatServiceImpl implements ChatService {
             roomService.getRoomList(clientDto.getId()).writeAndFlush(channel);
             clientDto.writeAndFlush(channel);
         }
+        channel.attr(CLIENT_ATTRIBUTE_KEY).set(clientDto);
     }
 
     @Override

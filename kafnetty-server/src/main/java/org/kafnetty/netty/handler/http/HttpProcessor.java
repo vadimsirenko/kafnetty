@@ -1,4 +1,4 @@
-package org.kafnetty.service;
+package org.kafnetty.netty.handler.http;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -24,7 +24,7 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class HttpResponseProcessorServiceImpl implements HttpResponseProcessorService{
+public class HttpProcessor {
     private static final Tika tika = new Tika();
     private final ResourceLoader resourceLoader;
 
