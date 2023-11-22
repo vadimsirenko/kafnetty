@@ -18,7 +18,6 @@
             this.$createRoomFormOk.on("click", this.createRoomFormOk.bind(this));
             this.$roomAddButton.on("click", this.createRoom.bind(this));
             this.$loginFormOk.on("click", this.loginFormOkClick.bind(this));
-
             this.$logoutButton.on("click", this.loginUser.bind(this));
             this.$profileButton.on("click", this.updateProfile.bind(this));
             this.$profileFormCancel.on("click", this.updateProfileCancel.bind(this));
@@ -42,8 +41,8 @@
             this.$loginForm = $('#login-form');
             this.$loginFormShowElements = $('#login-form, .fidebox');
             this.$loginFormOk = this.$loginForm.find('#login-form-ok');
-            this.$loginFormPassInput = this.$loginForm.find('#login-form-pass');
-            this.$loginFormNameInput = this.$loginForm.find('#login-form-name');
+            this.$loginFormPassInput = this.$loginForm.find('#pass');
+            this.$loginFormNameInput = this.$loginForm.find('#name');
             this.$loginFormValidate = this.$loginForm.find('.validate-error');
             this.$profileForm = $('#profile-form');
             this.$profileFormOk = this.$profileForm.find('#profile-form-ok');
@@ -496,3 +495,39 @@
     };
 
 })();
+$(document).ready(function() {
+    $("#login-form").validate(
+        {
+            errorClass: "error fail-alert",
+            validClass: "valid success-alert",
+            rules: {
+                name : {
+                    required: true,
+                    minlength: 3
+                },
+                pass: {
+                    required: true,
+                    minlength: 5
+                },
+                email: {
+                    required: true,
+                    email: true
+                }
+            },
+            messages : {
+                name: {
+                    required: "Пожалуйста, введите логин",
+                    minlength: "Логин должен быть не менее 3 символов"
+                },
+                pass: {
+                    required: "Пожалуйста, введите пароль",
+                    minlength: "Пароль должен быть не менее 5 символов"
+                },
+                e_mail: {
+                    required: "Пожалуйста, введите Email",
+                    email: "Email должен иметь формат: abc@domain.tld"
+                }
+            }
+        }
+    );
+});

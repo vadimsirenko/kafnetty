@@ -139,17 +139,19 @@
         <a class="button15" href="#" id="create-room-cancel">Отменить</a>
     </div>
 </div>
-<div class="modal-form" id="login-form" style="display: none;">
+<form class="modal-form" id="login-form" style="display: none;">
     <h2>Введте учетные данные</h2>
-    <label class="field-title" for="nikname">Лагин</label>
-    <input class="field-name" id="login-form-name" name="login-form-name" type="text">
-    <label class="field-title" for="nikname">Пароль</label>
-    <input class="field-name" id="login-form-pass" name="login-form-pass" type="password">
+    <label for="name" class="field-title">Логин</label>
+    <input class="field-name" id="name" name="name" type="text">
+    <label for="pass" class="field-title">Пароль</label>
+    <input class="field-name" id="pass" name="pass" type="password">
+    <label for="e_mail" class="field-title">E-Mail</label>
+    <input class="field-name" id="e_mail" name="e_mail" type="email">
     <div class="validate-error"></div>
     <div class="action-buttons">
         <a class="button15" href="#" id="login-form-ok">Войти</a>
     </div>
-</div>
+</form>
 <div class="modal-form" id="profile-form" style="display: none;">
     <h2>Редактирование профиля</h2>
     <label class="field-title" for="nikname">Ник</label>
@@ -164,6 +166,7 @@
 </div>
 <script src="static/js/base64.min.js"></script>
 <script src="static/js/jquery-3.7.1.min.js"></script>
+<script src="static/js/jquery.validate.min.js"></script>
 <script src="static/js/handlebars.min.js"></script>
 <script src="static/js/list.min.js"></script>
 <script src="static/js/script.js"></script>
