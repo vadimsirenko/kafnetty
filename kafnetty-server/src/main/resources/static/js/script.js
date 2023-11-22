@@ -42,7 +42,8 @@
             this.$loginForm = $('#login-form');
             this.$loginFormShowElements = $('#login-form, .fidebox');
             this.$loginFormOk = this.$loginForm.find('#login-form-ok');
-            this.$loginFormNameInput = this.$loginForm.find('.field-name');
+            this.$loginFormPassInput = this.$loginForm.find('#login-form-pass');
+            this.$loginFormNameInput = this.$loginForm.find('#login-form-name');
             this.$loginFormValidate = this.$loginForm.find('.validate-error');
             this.$profileForm = $('#profile-form');
             this.$profileFormOk = this.$profileForm.find('#profile-form-ok');
@@ -74,24 +75,55 @@
             });
             this.updateTitleChat(this.$roomSetList.find('.chat-item[data-id=' + this.roomId + ']').text());
         },
-        connectToChatServer: function (userLogin) {
+        connectToChatServer: function (login, password) {
+
+            let roomId = "2bd09cbf-ef16-469f-82ab-f51ae9913aa0";
+            let config = {
+                "messageType": "CLIENT",
+                "id": null,
+                "operationType": "LOGON",
+                "login": login,
+                "roomId": roomId,
+                "token": password
+            }
+            let configJSON = JSON.stringify(config);
+            // Encode the String
+            var self = $(this)
+            $.ajax({
+                url: window.location.origin + '/logon',
+                method: 'POST',
+                data: configJSON,
+                dataType: 'json',
+                success: function (data) {
+                    this.createWS(data)
+                }.bind(this),
+                error: function (jqXHR, exception) {
+                    if (jqXHR.status === 0) {
+                        alert('Not connect. Verify Network.');
+                    } else if (jqXHR.status == 404) {
+                        alert('Requested page not found (404).');
+                    } else if (jqXHR.status == 500) {
+                        alert('Internal Server Error (500).');
+                    } else if (exception === 'parsererror') {
+                        alert('Requested JSON parse failed.');
+                    } else if (exception === 'timeout') {
+                        alert('Time out error.');
+                    } else if (exception === 'abort') {
+                        alert('Ajax request aborted.');
+                    } else {
+                        alert('Uncaught Error. ' + jqXHR.responseText);
+                    }
+                }
+            });
+        },
+        createWS: function (data) {
             if (!window.WebSocket) {
                 window.WebSocket = window.MozWebSocket;
             }
             if (window.WebSocket) {
-                let roomId = "2bd09cbf-ef16-469f-82ab-f51ae9913aa0";
-                let config = {
-                    "messageType": "CLIENT",
-                    "id": null,
-                    "operationType": "LOGON",
-                    "login": userLogin,
-                    "roomId": roomId,
-                    "token": "dfgfdsgfdsgfdsgfdsgfdsg"
-                }
-                let configJSON = JSON.stringify(config);
+                let configJSON = JSON.stringify(data);
                 // Encode the String
                 let encodedString = Base64.encode(configJSON);
-
                 try {
                     this.socket = new WebSocket("ws://" + window.location.host + "/websocket/?request=" + encodedString);
                 } catch (e) {
@@ -178,18 +210,18 @@
         loginFormOkClick: function () {
             this.$loginFormValidate.text('');
             this.$loginFormValidate.hide();
-            if (this.$loginFormNameInput.val().trim() === '') {
+            if (this.$loginFormNameInput.val().trim() === '' || this.$loginFormPassInput.val().trim() ==='') {
                 return;
             } else if (this.$loginFormNameInput.val().trim().length > 2) {
-                this.login = this.$loginFormNameInput.val().trim();
-                this.connectToChatServer(this.login);
+                let login = this.$loginFormNameInput.val().trim();
+                let password = this.$loginFormPassInput.val().trim();
+                this.connectToChatServer(login, password);
             } else {
                 this.$loginFormValidate.text("Your username must be at least two characters.(oleg, vadim, sergey)");
                 this.$loginFormValidate.show();
             }
         },
         resetUser: function () {
-            this.login = null;
             this.email = null;
             this.roomId = null;
             this.messageToSend = '';
@@ -205,11 +237,13 @@
             this.$roomSetList.empty();
             this.$chatAbout.html('');
             this.$loginFormNameInput.val('');
+            this.$loginFormPassInput.val('');
             this.$loginFormShowElements.fadeIn('slow');
         },
         loginUser: function () {
             this.resetUser();
             this.$loginFormNameInput.val('');
+            this.$loginFormPassInput.val('');
             this.$loginFormShowElements.fadeIn('slow');
         },
         updateProfile: function () {
@@ -243,7 +277,7 @@
                     "operationType": "UPDATE",
                     "email": email,
                     "nickName": nikname,
-                    "login": this.login,
+                    "login": null,
                     "roomId": this.roomId,
                     "ts": new Date().getTime()
                 };
@@ -266,7 +300,6 @@
             this.senderId = data.id;
             this.nickName = data.nickName;
             this.email = data.email;
-            this.login = data.login;
             if (data.roomId != null) {
                 this.roomId = data.roomId;
                 this.coloredChatList();

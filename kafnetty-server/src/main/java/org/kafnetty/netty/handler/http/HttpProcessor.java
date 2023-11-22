@@ -10,6 +10,7 @@ import io.netty.util.CharsetUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tika.Tika;
+import org.kafnetty.dto.BaseDto;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Component;
@@ -69,7 +70,7 @@ public class HttpProcessor {
         return headers;
     }
 
-    public void sendHttpResponse(ChannelHandlerContext ctx, HttpRequest req, FullHttpResponse res) {
+    public void sendHttpResponse(ChannelHandlerContext ctx, HttpRequest request, FullHttpResponse res) {
         if (res.status().code() != HttpResponseStatus.OK.code()) {
             ByteBuf buf = Unpooled.copiedBuffer(res.status().toString(), CharsetUtil.UTF_8);
             res.content().writeBytes(buf);
@@ -77,8 +78,16 @@ public class HttpProcessor {
             HttpUtil.setContentLength(res, res.content().readableBytes());
         }
         ChannelFuture f = ctx.channel().writeAndFlush(res);
-        if (!HttpUtil.isKeepAlive(req) || res.status().code() != HttpResponseStatus.OK.code()) {
+        if (!HttpUtil.isKeepAlive(request) || res.status().code() != HttpResponseStatus.OK.code()) {
             f.addListener(ChannelFutureListener.CLOSE);
         }
+    }
+    public void sendHttpJsonResponse(ChannelHandlerContext ctx, HttpRequest request, HttpResponseStatus status, BaseDto baseDto) {
+        ByteBuf buf = Unpooled.copiedBuffer(baseDto.toJson(), CharsetUtil.UTF_8);
+        var response = new DefaultFullHttpResponse(HTTP_1_1, status);
+        response.content().writeBytes(buf);
+        HttpUtil.setContentLength(response, response.content().readableBytes());
+        response.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/json");
+        sendHttpResponse(ctx, request, response);
     }
 }

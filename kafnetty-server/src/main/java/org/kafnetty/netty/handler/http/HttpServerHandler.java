@@ -1,13 +1,16 @@
 package org.kafnetty.netty.handler.http;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.websocketx.*;
 import io.netty.util.AttributeKey;
+import io.netty.util.CharsetUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.kafnetty.dto.BaseDto;
 import org.kafnetty.dto.ClientDto;
+import org.kafnetty.dto.ErrorDto;
 import org.kafnetty.netty.handler.websocket.BaseWebSocketServerHandler;
 import org.kafnetty.service.ChatService;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -20,6 +23,7 @@ import java.util.Map;
 
 import static io.netty.handler.codec.http.HttpHeaderNames.*;
 import static io.netty.handler.codec.http.HttpMethod.GET;
+import static io.netty.handler.codec.http.HttpMethod.POST;
 import static io.netty.handler.codec.http.HttpResponseStatus.*;
 import static io.netty.handler.codec.http.HttpResponseStatus.NOT_FOUND;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
@@ -86,12 +90,25 @@ public class HttpServerHandler extends BaseWebSocketServerHandler<FullHttpReques
                     httpProcessor.handleResource(ctx, request, request.uri().substring(1));
                     return false;
                 }
-                // TODO Реализовать authentication
+                // TODO Реализовать проверку jwt token
                 String jsonMessage = new String(Base64.getDecoder().decode(requestParams.get(HTTP_PARAM_REQUEST).get(0)), StandardCharsets.UTF_8);
                 chatService.processMessage(BaseDto.decode(jsonMessage), ctx.channel());
                 setClientToContext(ctx.channel(), (ClientDto)ClientDto.decode(jsonMessage));
                 return true;
 
+            } else if(request.method() == POST && request.uri().equals(LOGON_PATH)){
+                ByteBuf jsonBuf = request.content();
+                String jsonStr = jsonBuf.toString(CharsetUtil.UTF_8);
+                BaseDto baseDto = BaseDto.decode(jsonStr);
+                if(baseDto == null){
+                    httpProcessor.sendHttpResponse(ctx, request, new DefaultFullHttpResponse(HTTP_1_1, FORBIDDEN));
+                    return false;
+                }
+                // TODO проверка аутентикации и возвращение jwt token
+                chatService.processMessage(baseDto, ctx.channel());
+                setClientToContext(ctx.channel(), (ClientDto)baseDto);
+                httpProcessor.sendHttpJsonResponse(ctx, request, OK, (ClientDto)baseDto);
+                return false;
             } else{
                 httpProcessor.sendHttpResponse(ctx, request, new DefaultFullHttpResponse(HTTP_1_1, FORBIDDEN));
                 return false;

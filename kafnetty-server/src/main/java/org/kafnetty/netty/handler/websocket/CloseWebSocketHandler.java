@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 @ChannelHandler.Sharable
-@Qualifier("webSocketServerHandler")
 @RequiredArgsConstructor
 @Slf4j
 public class CloseWebSocketHandler extends BaseWebSocketServerHandler<CloseWebSocketFrame> {
