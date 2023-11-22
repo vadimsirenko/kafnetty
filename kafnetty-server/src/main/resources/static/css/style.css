@@ -376,15 +376,36 @@ a.button15:active {
     width: 370px;
     display: inline-block;
 }
-
+/*
 input.error.fail-alert {
-    border: 2px solid red;
+    border: 2px solid #f37e98;
     border-radius: 4px;
     line-height: 1;
     padding: 2px 0 6px 6px;
     background: #ffe6eb;
 }
+
+
+div.message{
+    background: transparent url(msg_arrow.gif) no-repeat scroll left center;
+    padding-left: 7px;
+    background-color: #6A6C75;
+}
+*/
+
+input.error.fail-alert {
+    border: 2px solid #f37e98;
+    border-radius: 4px;
+    line-height: 1;
+    padding: 2px 10px 6px 6px;
+    background: #ffe6eb;
+}
 input.valid.success-alert {
     border: 2px solid #4CAF50;
     color: green;
+}
+div.error.fail-alert {
+    line-height: 1;
+    padding: 2px 2px 6px 25px;
+    color: #f37e98;
 }

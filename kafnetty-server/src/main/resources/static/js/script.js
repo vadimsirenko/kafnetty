@@ -75,45 +75,47 @@
             this.updateTitleChat(this.$roomSetList.find('.chat-item[data-id=' + this.roomId + ']').text());
         },
         connectToChatServer: function (login, password) {
-
-            let roomId = "2bd09cbf-ef16-469f-82ab-f51ae9913aa0";
-            let config = {
-                "messageType": "CLIENT",
-                "id": null,
-                "operationType": "LOGON",
-                "login": login,
-                "roomId": roomId,
-                "token": password
-            }
-            let configJSON = JSON.stringify(config);
-            // Encode the String
-            var self = $(this)
-            $.ajax({
-                url: window.location.origin + '/logon',
-                method: 'POST',
-                data: configJSON,
-                dataType: 'json',
-                success: function (data) {
-                    this.createWS(data)
-                }.bind(this),
-                error: function (jqXHR, exception) {
-                    if (jqXHR.status === 0) {
-                        alert('Not connect. Verify Network.');
-                    } else if (jqXHR.status == 404) {
-                        alert('Requested page not found (404).');
-                    } else if (jqXHR.status == 500) {
-                        alert('Internal Server Error (500).');
-                    } else if (exception === 'parsererror') {
-                        alert('Requested JSON parse failed.');
-                    } else if (exception === 'timeout') {
-                        alert('Time out error.');
-                    } else if (exception === 'abort') {
-                        alert('Ajax request aborted.');
-                    } else {
-                        alert('Uncaught Error. ' + jqXHR.responseText);
-                    }
+            var isvalid = this.$loginForm.valid();
+            if (isvalid) {
+                let roomId = "2bd09cbf-ef16-469f-82ab-f51ae9913aa0";
+                let config = {
+                    "messageType": "CLIENT",
+                    "id": null,
+                    "operationType": "LOGON",
+                    "login": login,
+                    "roomId": roomId,
+                    "token": password
                 }
-            });
+                let configJSON = JSON.stringify(config);
+                // Encode the String
+                var self = $(this)
+                $.ajax({
+                    url: window.location.origin + '/logon',
+                    method: 'POST',
+                    data: configJSON,
+                    dataType: 'json',
+                    success: function (data) {
+                        this.createWS(data)
+                    }.bind(this),
+                    error: function (jqXHR, exception) {
+                        if (jqXHR.status === 0) {
+                            alert('Not connect. Verify Network.');
+                        } else if (jqXHR.status == 404) {
+                            alert('Requested page not found (404).');
+                        } else if (jqXHR.status == 500) {
+                            alert('Internal Server Error (500).');
+                        } else if (exception === 'parsererror') {
+                            alert('Requested JSON parse failed.');
+                        } else if (exception === 'timeout') {
+                            alert('Time out error.');
+                        } else if (exception === 'abort') {
+                            alert('Ajax request aborted.');
+                        } else {
+                            alert('Uncaught Error. ' + jqXHR.responseText);
+                        }
+                    }
+                });
+            }
         },
         createWS: function (data) {
             if (!window.WebSocket) {
@@ -209,7 +211,7 @@
         loginFormOkClick: function () {
             this.$loginFormValidate.text('');
             this.$loginFormValidate.hide();
-            if (this.$loginFormNameInput.val().trim() === '' || this.$loginFormPassInput.val().trim() ==='') {
+            if (this.$loginFormNameInput.val().trim() === '' || this.$loginFormPassInput.val().trim() === '') {
                 return;
             } else if (this.$loginFormNameInput.val().trim().length > 2) {
                 let login = this.$loginFormNameInput.val().trim();
@@ -495,13 +497,14 @@
     };
 
 })();
-$(document).ready(function() {
+$(document).ready(function () {
     $("#login-form").validate(
         {
             errorClass: "error fail-alert",
             validClass: "valid success-alert",
+            errorElement: "div",
             rules: {
-                name : {
+                name: {
                     required: true,
                     minlength: 3
                 },
@@ -509,12 +512,16 @@ $(document).ready(function() {
                     required: true,
                     minlength: 5
                 },
-                email: {
+                e_mail: {
                     required: true,
                     email: true
+                },
+                pass_confirm:{
+                    required: true,
+                    equalTo:'#pass'
                 }
             },
-            messages : {
+            messages: {
                 name: {
                     required: "Пожалуйста, введите логин",
                     minlength: "Логин должен быть не менее 3 символов"
@@ -526,6 +533,10 @@ $(document).ready(function() {
                 e_mail: {
                     required: "Пожалуйста, введите Email",
                     email: "Email должен иметь формат: abc@domain.tld"
+                },
+                pass_confirm:{
+                    required: "Пожалуйста, введите пароль повторно",
+                    equalTo: "Пароль должен совпадать"
                 }
             }
         }
