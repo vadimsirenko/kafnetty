@@ -9,15 +9,20 @@ import io.netty.util.CharsetUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.kafnetty.dto.BaseDto;
-import org.kafnetty.dto.ClientDto;
-import org.kafnetty.dto.ErrorDto;
+import org.kafnetty.dto.UserDto;
+import org.kafnetty.netty.handler.auth.AuthProcessor;
+import org.kafnetty.netty.handler.auth.JwtService;
+import org.kafnetty.netty.handler.auth.Session;
 import org.kafnetty.netty.handler.websocket.BaseWebSocketServerHandler;
+import org.kafnetty.service.AuthenticationService;
 import org.kafnetty.service.ChatService;
+import org.kafnetty.type.MessageType;
+import org.kafnetty.type.OperationType;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
@@ -28,6 +33,8 @@ import static io.netty.handler.codec.http.HttpResponseStatus.*;
 import static io.netty.handler.codec.http.HttpResponseStatus.NOT_FOUND;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 import static org.kafnetty.config.ServerConstants.*;
+import static org.kafnetty.netty.handler.auth.UserContext.hasContext;
+import static org.kafnetty.netty.handler.auth.UserContext.setContext;
 
 @Component
 @ChannelHandler.Sharable
@@ -36,10 +43,11 @@ import static org.kafnetty.config.ServerConstants.*;
 @Slf4j
 public class HttpServerHandler extends BaseWebSocketServerHandler<FullHttpRequest> {
     protected static final AttributeKey<WebSocketServerHandshaker> HANDSHAKER_ATTR_KEY = AttributeKey.valueOf(WebSocketServerHandshaker.class, "HANDSHAKER");
-    public static final AttributeKey<ClientDto> CLIENT_ATTR_KEY = AttributeKey.valueOf("CLIENT");
+    public static final AttributeKey<Session> SESSION_ATTR_KEY = AttributeKey.valueOf("SESSION");
 
     private final ChatService chatService;
     private final HttpProcessor httpProcessor;
+    private final AuthProcessor authProcessor;
     private static String getWebSocketLocation(HttpRequest req) {
         String location = req.headers().get(HOST) + WEBSOCKET_PATH;
         return "ws://" + location;
@@ -70,51 +78,27 @@ public class HttpServerHandler extends BaseWebSocketServerHandler<FullHttpReques
                 return false;
             }
             // GET methods.
-            if (request.method() == GET){
-                if ("/favicon.ico".equals(request.uri()) || "/".equals(request.uri())) {
+            else if (request.method() == GET){
+                if (request.method() == GET && request.uri().startsWith(WEBSOCKET_PATH)) {
+                    authProcessor.loadContext(ctx, request);
+                    return true;
+                }
+                else if ("/favicon.ico".equals(request.uri()) || "/".equals(request.uri())) {
                     System.out.println("not fount! : " + request.uri());
                     httpProcessor.sendHttpResponse(ctx, request, new DefaultFullHttpResponse(HTTP_1_1, NOT_FOUND));
-                    return false;
                 }
-                if (request.uri().startsWith(STATIC_CONTENT_PATH) || request.uri().startsWith(CHAT_PATH)) {
-                    httpProcessor.handleResource(ctx, request, request.uri().substring(1));
-                    return false;
+                else if (request.uri().startsWith(STATIC_CONTENT_PATH) || request.uri().startsWith(CHAT_PATH)) {
+                    httpProcessor.sendContentResponse(ctx, request, request.uri().substring(1));
                 }
-                if (!request.uri().startsWith(WEBSOCKET_PATH)) {
-                    return false;
-                }
-
-                Map<String, List<String>> requestParams = new QueryStringDecoder(request.uri()).parameters();
-
-                if (requestParams.isEmpty() || !requestParams.containsKey(HTTP_PARAM_REQUEST)) {
-                    httpProcessor.handleResource(ctx, request, request.uri().substring(1));
-                    return false;
-                }
-                // TODO Реализовать проверку jwt token
-                String jsonMessage = new String(Base64.getDecoder().decode(requestParams.get(HTTP_PARAM_REQUEST).get(0)), StandardCharsets.UTF_8);
-                chatService.processMessage(BaseDto.decode(jsonMessage), ctx.channel());
-                setClientToContext(ctx.channel(), (ClientDto)ClientDto.decode(jsonMessage));
-                return true;
-
-            } else if(request.method() == POST && request.uri().equals(LOGON_PATH)){
-                ByteBuf jsonBuf = request.content();
-                String jsonStr = jsonBuf.toString(CharsetUtil.UTF_8);
-                BaseDto baseDto = BaseDto.decode(jsonStr);
-                if(baseDto == null){
-                    httpProcessor.sendHttpResponse(ctx, request, new DefaultFullHttpResponse(HTTP_1_1, FORBIDDEN));
-                    return false;
-                }
-                // TODO проверка аутентикации и возвращение jwt token
-                chatService.processMessage(baseDto, ctx.channel());
-                setClientToContext(ctx.channel(), (ClientDto)baseDto);
-                httpProcessor.sendHttpJsonResponse(ctx, request, OK, (ClientDto)baseDto);
-                return false;
+            }
+            else if (request.method() == POST && request.uri().equals(LOGON_PATH)) {
+               httpProcessor.sendHttpJsonResponse(ctx, request, OK, authProcessor.createUserToken(request));
             } else{
                 httpProcessor.sendHttpResponse(ctx, request, new DefaultFullHttpResponse(HTTP_1_1, FORBIDDEN));
-                return false;
             }
-        } catch (RuntimeException ex) {
-            httpProcessor.sendHttpResponse(ctx, request, new DefaultFullHttpResponse(HTTP_1_1, NOT_FOUND));
+            return false;
+        } catch (Exception ex) {
+            httpProcessor.sendHttpResponse(ctx, request, new DefaultFullHttpResponse(HTTP_1_1, BAD_REQUEST));
             log.error("error at process Http request", ex);
             return false;
         }
@@ -124,11 +108,5 @@ public class HttpServerHandler extends BaseWebSocketServerHandler<FullHttpReques
     }
     private static void setHandshaker(Channel channel, WebSocketServerHandshaker handshaker) {
         channel.attr(HANDSHAKER_ATTR_KEY).set(handshaker);
-    }
-    private static void setClientToContext(Channel channel, ClientDto clientDto) {
-        channel.attr(CLIENT_ATTR_KEY).set(clientDto);
-    }
-    public static ClientDto getClientFromContext(Channel channel) {
-        return channel.attr(CLIENT_ATTR_KEY).get();
     }
 }

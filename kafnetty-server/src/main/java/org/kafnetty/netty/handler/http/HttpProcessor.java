@@ -29,7 +29,7 @@ public class HttpProcessor {
     private static final Tika tika = new Tika();
     private final ResourceLoader resourceLoader;
 
-    public void handleResource(ChannelHandlerContext ctx, HttpRequest request, String resourcePath) {
+    public void sendContentResponse(ChannelHandlerContext ctx, HttpRequest request, String resourcePath) {
         int questionIndex = resourcePath.indexOf("?");
         if (questionIndex != -1) {
             resourcePath = resourcePath.substring(0, questionIndex);

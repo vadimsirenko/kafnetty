@@ -9,6 +9,7 @@ import java.util.UUID;
 public interface ChatService {
 
     void removeChannel(Channel channel);
+    void putChannel(UUID roomId, Channel channel);
 
     void processMessage(BaseDto messageDto, Channel channel);
 

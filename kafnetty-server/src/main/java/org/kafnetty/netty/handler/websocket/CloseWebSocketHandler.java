@@ -16,12 +16,9 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 @Slf4j
 public class CloseWebSocketHandler extends BaseWebSocketServerHandler<CloseWebSocketFrame> {
-    private final ChatService chatService;
-
     @Override
     public void channelRead0(ChannelHandlerContext ctx, CloseWebSocketFrame frame) {
         WebSocketServerHandshaker handshaker = HttpServerHandler.getHandshaker(ctx.channel());
-        chatService.removeChannel(ctx.channel());
         handshaker.close(ctx.channel(), frame.retain());
         System.out.println(ctx.channel() + " closed");
     }

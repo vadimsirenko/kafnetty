@@ -8,7 +8,7 @@ import org.kafnetty.entity.Room;
 import org.kafnetty.kafka.config.KafnettyConsumerConfig;
 import org.kafnetty.mapper.RoomMapper;
 import org.kafnetty.repository.RoomRepository;
-import org.kafnetty.type.OPERATION_TYPE;
+import org.kafnetty.type.OperationType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -31,9 +31,9 @@ public class RoomServiceImpl implements RoomService {
         if (room == null)
             throw new RuntimeException("Message is not valid");
         Room existsRoom = roomRepository.findByName(room.getName());
-        if (existsRoom != null && roomDto.getOperationType() == OPERATION_TYPE.CREATE) {
+        if (existsRoom != null && roomDto.getOperationType() == OperationType.CREATE) {
             room = existsRoom;
-        } else if (existsRoom != null && roomDto.getOperationType() == OPERATION_TYPE.UPDATE) {
+        } else if (existsRoom != null && roomDto.getOperationType() == OperationType.UPDATE) {
             existsRoom.setName(roomDto.getName());
             room = roomRepository.saveAndFlush(existsRoom);
         } else {

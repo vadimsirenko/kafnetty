@@ -12,8 +12,8 @@ import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import org.kafnetty.type.MESSAGE_TYPE;
-import org.kafnetty.type.OPERATION_TYPE;
+import org.kafnetty.type.MessageType;
+import org.kafnetty.type.OperationType;
 
 import java.util.UUID;
 
@@ -29,7 +29,7 @@ import java.util.UUID;
         @JsonSubTypes.Type(value = MessageListDto.class, name = "MESSAGE_LIST"),
         @JsonSubTypes.Type(value = RoomDto.class, name = "ROOM"),
         @JsonSubTypes.Type(value = RoomListDto.class, name = "ROOM_LIST"),
-        @JsonSubTypes.Type(value = ClientDto.class, name = "CLIENT"),
+        @JsonSubTypes.Type(value = UserDto.class, name = "USER"),
         @JsonSubTypes.Type(value = ErrorDto.class, name = "ERROR"),
         @JsonSubTypes.Type(value = InfoDto.class, name = "INFO")
 })
@@ -37,18 +37,18 @@ public abstract class BaseDto {
     private static ObjectMapper MAPPER = new ObjectMapper();
     private UUID id = UUID.randomUUID();
     private String clusterId;
-    private MESSAGE_TYPE messageType;
-    private OPERATION_TYPE operationType = OPERATION_TYPE.NONE;
+    private MessageType messageType;
+    private OperationType operationType = OperationType.NONE;
     private Long ts;
 
-    public BaseDto(MESSAGE_TYPE messageType, OPERATION_TYPE operationType) {
+    public BaseDto(MessageType messageType, OperationType operationType) {
         this.messageType = messageType;
         this.operationType = operationType;
         this.ts = System.currentTimeMillis();
     }
 
     public BaseDto() {
-        this.messageType = MESSAGE_TYPE.UNKNOWN;
+        this.messageType = MessageType.UNKNOWN;
         this.ts = System.currentTimeMillis();
     }
 

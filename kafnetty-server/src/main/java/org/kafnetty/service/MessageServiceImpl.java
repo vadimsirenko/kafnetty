@@ -1,14 +1,19 @@
 package org.kafnetty.service;
 
+import io.netty.channel.Channel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.kafnetty.dto.BaseDto;
 import org.kafnetty.dto.MessageDto;
 import org.kafnetty.dto.MessageListDto;
 import org.kafnetty.entity.Message;
+import org.kafnetty.entity.User;
 import org.kafnetty.kafka.config.KafnettyConsumerConfig;
 import org.kafnetty.mapper.MessageMapper;
+import org.kafnetty.netty.handler.auth.UserContext;
 import org.kafnetty.repository.MessageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -33,6 +38,8 @@ public final class MessageServiceImpl implements MessageService {
         }
         return messageMapper.MessageToChannelMessageDto(chatMessage);
     }
+
+
 
     @Override
     public MessageListDto processMessageList(MessageListDto messageListDto) {
@@ -62,5 +69,14 @@ public final class MessageServiceImpl implements MessageService {
     public List<MessageDto> getNotSyncMessages() {
         List<Message> messages = messageRepository.findBySentAndClusterId(false, kafnettyConsumerConfig.getGroupId());
         return messageMapper.ToMessageDtoList(messages);
+    }
+
+    @Override
+    public MessageDto createMessage(BaseDto message, Channel channel) {
+        User user = UserContext.getContext(channel).getUser();
+        MessageDto receiveMessage = (MessageDto)message;
+        receiveMessage.setSenderId(user.getId());
+        receiveMessage.setSender(user.getNickName());
+        return receiveMessage;
     }
 }

@@ -2,7 +2,7 @@ package org.kafnetty.type;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public enum MESSAGE_TYPE {
+public enum MessageType {
     @JsonProperty("MESSAGE")
     MESSAGE,
     @JsonProperty("MESSAGE_LIST")
@@ -11,8 +11,10 @@ public enum MESSAGE_TYPE {
     ROOM,
     @JsonProperty("ROOM_LIST")
     ROOM_LIST,
-    @JsonProperty("CLIENT")
-    CLIENT,
+    @JsonProperty("USER")
+    USER,
+    @JsonProperty("TOKEN")
+    TOKEN,
     @JsonProperty("INFO")
     INFO,
     @JsonProperty("ERROR")

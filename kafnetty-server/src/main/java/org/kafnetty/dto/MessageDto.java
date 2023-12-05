@@ -2,8 +2,8 @@ package org.kafnetty.dto;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.kafnetty.type.MESSAGE_TYPE;
-import org.kafnetty.type.OPERATION_TYPE;
+import org.kafnetty.type.MessageType;
+import org.kafnetty.type.OperationType;
 
 import java.util.UUID;
 
@@ -17,6 +17,6 @@ public class MessageDto extends BaseDto {
     private String clusterId;
 
     public MessageDto() {
-        super(MESSAGE_TYPE.MESSAGE, OPERATION_TYPE.CREATE);
+        super(MessageType.MESSAGE, OperationType.CREATE);
     }
 }
