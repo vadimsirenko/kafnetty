@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class AuthenticationServiceImpl implements AuthenticationService{
     private final JwtService jwtService;
-    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(16);
     private final UserRepository userRepository;
     @Override
     public TokenDto register(UserDto userDto) {
@@ -31,9 +31,8 @@ public class AuthenticationServiceImpl implements AuthenticationService{
 
     @Override
     public TokenDto authenticate(UserDto userDto) {
-        final String  password = passwordEncoder.encode(userDto.getPassword());
         User user = userRepository.findByEmail(userDto.getEmail()).orElseThrow();
-        if(!user.getPassword().equals(password)){
+        if(!passwordEncoder.matches(userDto.getPassword(), user.getPassword())){
             throw new InvalidPasswordException();
         }
         return new TokenDto(jwtService.generateToken(user));

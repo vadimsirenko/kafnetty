@@ -19,8 +19,8 @@
             this.$createRoomFormCancel.on("click", this.createRoomFormCancel.bind(this));
             this.$createRoomFormOk.on("click", this.createRoomFormOk.bind(this));
             this.$roomAddButton.on("click", this.createRoom.bind(this));
-            // Sign-in sign-up events
-            this.$signUpForm.find('.btn').on("click", this.signUp.bind(this));
+            // Sign-in and Sign-up events
+            $('.form-wrapper .btn').on("click", this.logonToChat.bind(this));
             // profile events
             this.$profileButton.on("click", this.updateProfile.bind(this));
             this.$profileFormCancel.on("click", this.updateProfileCancel.bind(this));
@@ -422,7 +422,7 @@
             }
         },
         "senderId": null,
-        "signUp": function (src) {
+        "logonToChat": function (src) {
             let form = $(src.target.closest('form'));
             if (form.valid()) {
                 let form_data = this.convertFormToJSON(form);

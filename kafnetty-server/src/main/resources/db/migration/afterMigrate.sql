@@ -1,8 +1,8 @@
 TRUNCATE TABLE _user;
 INSERT INTO _user(id, full_name, nick_name, email, password, role, sent)
-VALUES ('a5461723-b1de-4351-a2f0-94bc2e1a2f92', 'Вадим Сиренко', 'Вадим', 'vadim@mail.ru', '1234567', 'ADMIN', true),
-       ('f9b26b13-6a8e-41e0-9332-9b14eaa6d60a', 'Сергей Иванов', 'Сергей', 'sergey@mail.ru', '1234567', 'USER', true),
-       ('92aeaf7c-39e3-49a7-b69a-18de73efb479', 'Олег Погудин','Олег', 'oleg@mail.ru', '1234567', 'USER', false);
+VALUES ('a5461723-b1de-4351-a2f0-94bc2e1a2f92', 'Вадим Сиренко', 'Вадим', 'vadim@mail.ru', '$2a$10$r4emLi5YWWu2rruNkXixjOFKDD8paiBV1UUMfmJ9ci0CebKl4cF7e', 'ADMIN', true),
+       ('f9b26b13-6a8e-41e0-9332-9b14eaa6d60a', 'Сергей Иванов', 'Сергей', 'sergey@mail.ru', '$2a$10$r4emLi5YWWu2rruNkXixjOFKDD8paiBV1UUMfmJ9ci0CebKl4cF7e', 'USER', true),
+       ('92aeaf7c-39e3-49a7-b69a-18de73efb479', 'Олег Погудин','Олег', 'oleg@mail.ru', '$2a$10$r4emLi5YWWu2rruNkXixjOFKDD8paiBV1UUMfmJ9ci0CebKl4cF7e', 'USER', false);
 
 TRUNCATE TABLE room;
 INSERT INTO room(id, cluster_id, name, is_sent)
