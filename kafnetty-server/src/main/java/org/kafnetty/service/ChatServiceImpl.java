@@ -35,10 +35,11 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public void removeChannel(Channel channel) {
         Session session = UserContext.getContext(channel);
-        assert session != null;
-        channelRepository.removeChannelFromRoom(session.getRoomId(), channel,
-                oldGroup -> InfoDto.createLogoffInfo(session.getUser().getNickName()).writeAndFlush(oldGroup));
-        clientService.removeChannelUser(channel.id().asLongText());
+        if(session!=null) {
+            channelRepository.removeChannelFromRoom(session.getRoomId(), channel,
+                    oldGroup -> InfoDto.createLogoffInfo(session.getUser().getNickName()).writeAndFlush(oldGroup));
+            clientService.removeChannelUser(channel.id().asLongText());
+        }
     }
 
     @Override
@@ -91,11 +92,6 @@ public class ChatServiceImpl implements ChatService {
             default -> {
             }
         }
-    }
-
-    @Override
-    public boolean existsChannelUser(Channel channel) {
-        return clientService.existsChannelUser(channel.id().asLongText());
     }
 
     @Override

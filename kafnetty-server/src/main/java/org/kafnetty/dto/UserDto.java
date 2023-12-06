@@ -9,7 +9,7 @@ import org.kafnetty.type.OperationType;
 @Setter
 public class UserDto extends BaseDto {
     private String email;
-    private String full_name;
+    private String fullName;
     private String nickName;
     private String password;
     private String clusterId;

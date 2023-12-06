@@ -39,8 +39,6 @@ public final class MessageServiceImpl implements MessageService {
         return messageMapper.MessageToChannelMessageDto(chatMessage);
     }
 
-
-
     @Override
     public MessageListDto processMessageList(MessageListDto messageListDto) {
         return getMessageListByRoomId(messageListDto.getRoomId(), messageListDto.getSenderId());

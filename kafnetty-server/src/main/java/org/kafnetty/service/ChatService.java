@@ -13,8 +13,6 @@ public interface ChatService {
 
     void processMessage(BaseDto messageDto, Channel channel);
 
-    boolean existsChannelUser(Channel channel);
-
     void InitChannel(Channel channel);
 
     void processBaseDtoFromKafka(ConsumerRecord<UUID, BaseDto> consumerRecord);

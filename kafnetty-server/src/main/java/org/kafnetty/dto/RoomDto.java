@@ -10,7 +10,6 @@ import org.kafnetty.type.OperationType;
 public class RoomDto extends BaseDto {
     private String name;
     private long messageCount;
-    private String clusterId;
 
     public RoomDto() {
         super(MessageType.ROOM, OperationType.UPDATE);

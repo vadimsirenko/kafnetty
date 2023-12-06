@@ -14,7 +14,6 @@ public class MessageDto extends BaseDto {
     private UUID senderId;
     private UUID roomId;
     private String sender;
-    private String clusterId;
 
     public MessageDto() {
         super(MessageType.MESSAGE, OperationType.CREATE);

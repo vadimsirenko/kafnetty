@@ -1,4 +1,4 @@
-package org.kafnetty.netty.handler.auth;
+package org.kafnetty.service;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
