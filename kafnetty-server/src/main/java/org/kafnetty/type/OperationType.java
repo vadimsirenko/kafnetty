@@ -2,7 +2,7 @@ package org.kafnetty.type;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public enum OPERATION_TYPE {
+public enum OperationType {
     @JsonProperty("CREATE")
     CREATE,
     @JsonProperty("UPDATE")

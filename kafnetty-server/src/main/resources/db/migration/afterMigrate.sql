@@ -1,8 +1,8 @@
-TRUNCATE TABLE public.client;
-INSERT INTO client(id, cluster_id, login, nick_name, email, token, is_sent)
-VALUES ('a5461723-b1de-4351-a2f0-94bc2e1a2f92', 'test-1', 'vadim', 'Вадим', 'vadim@mail.ru', '1234567', true),
-       ('f9b26b13-6a8e-41e0-9332-9b14eaa6d60a', 'test-1', 'sergey', 'Сергей', 'sergey@mail.ru', '1234567', true),
-       ('92aeaf7c-39e3-49a7-b69a-18de73efb479', 'kafnetty-1', 'oleg', 'Олег', 'oleg@mail.ru', '1234567', false);
+TRUNCATE TABLE _user;
+INSERT INTO _user(id, full_name, nick_name, email, password, role, sent)
+VALUES ('a5461723-b1de-4351-a2f0-94bc2e1a2f92', 'Вадим Сиренко', 'Вадим', 'vadim@mail.ru', '$2a$10$r4emLi5YWWu2rruNkXixjOFKDD8paiBV1UUMfmJ9ci0CebKl4cF7e', 'ADMIN', true),
+       ('f9b26b13-6a8e-41e0-9332-9b14eaa6d60a', 'Сергей Иванов', 'Сергей', 'sergey@mail.ru', '$2a$10$r4emLi5YWWu2rruNkXixjOFKDD8paiBV1UUMfmJ9ci0CebKl4cF7e', 'USER', true),
+       ('92aeaf7c-39e3-49a7-b69a-18de73efb479', 'Олег Погудин','Олег', 'oleg@mail.ru', '$2a$10$r4emLi5YWWu2rruNkXixjOFKDD8paiBV1UUMfmJ9ci0CebKl4cF7e', 'USER', false);
 
 TRUNCATE TABLE room;
 INSERT INTO room(id, cluster_id, name, is_sent)
@@ -14,7 +14,7 @@ TRUNCATE TABLE message;
 INSERT INTO message(id, cluster_id, sender_id, sender, room_id, message_text, ts, is_sent)
 VALUES ('fd2d7cc1-5ac9-40e9-b4f7-fc518eedd095', 'test-1', 'a5461723-b1de-4351-a2f0-94bc2e1a2f92', 'Вадим',
         '2bd09cbf-ef16-469f-82ab-f51ae9913aa0',
-        'Our use case is simple, the server will simply transform the request body and query parameters, if any, to uppercase. A word of caution here on reflecting request data in the response – we are doing this only for demonstration purposes, to understand how we can use Netty to implement an HTTP server.',
+        'Our use case is simple, the server will simply createMessage the request body and query parameters, if any, to uppercase. A word of caution here on reflecting request data in the response – we are doing this only for demonstration purposes, to understand how we can use Netty to implement an HTTP server.',
         4324324, false),
        ('057a7522-df71-4406-9559-844e7ce7cf4c', 'test-1', 'a5461723-b1de-4351-a2f0-94bc2e1a2f92', 'Вадим',
         '2bd09cbf-ef16-469f-82ab-f51ae9913aa0',
@@ -22,11 +22,11 @@ VALUES ('fd2d7cc1-5ac9-40e9-b4f7-fc518eedd095', 'test-1', 'a5461723-b1de-4351-a2
         3254356, false),
        ('3eac2bf1-e223-4bbf-a51e-2c3d3ef71cbc', 'test-1', 'a5461723-b1de-4351-a2f0-94bc2e1a2f92', 'Вадим',
         '2bd09cbf-ef16-469f-82ab-f51ae9913aa0',
-        'Can anyone provide an example of a simple HTTP server implemented using Netty, that supports persistent HTTP connections. In other words, it won''t close the connection until the client closes it, and can receive additional HTTP requests over the same connection?',
+        'Can anyone provide an example of a simple HTTP server implemented using Netty, that supports persistent HTTP connections. In other words, it won''t close the connection until the user closes it, and can receive additional HTTP requests over the same connection?',
         54366534, false),
        ('9c2ccdad-5aca-474b-8151-f8368a65b844', 'test-1', 'f9b26b13-6a8e-41e0-9332-9b14eaa6d60a', 'Сергей',
         '2bd09cbf-ef16-469f-82ab-f51ae9913aa0',
-        'In other words, it won''t close the connection until the client closes it, and can receive additional HTTP requests over the same connection?',
+        'In other words, it won''t close the connection until the user closes it, and can receive additional HTTP requests over the same connection?',
         3543535, false),
        ('65eda846-3dfe-48b1-8c2b-8304e047c544', 'test-1', 'a5461723-b1de-4351-a2f0-94bc2e1a2f92', 'Вадим',
         '2bd09cbf-ef16-469f-82ab-f51ae9913aa0',

@@ -3,8 +3,8 @@ package org.kafnetty.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
 import lombok.Setter;
-import org.kafnetty.type.MESSAGE_TYPE;
-import org.kafnetty.type.OPERATION_TYPE;
+import org.kafnetty.type.MessageType;
+import org.kafnetty.type.OperationType;
 
 @Getter
 @Setter
@@ -12,21 +12,21 @@ import org.kafnetty.type.OPERATION_TYPE;
 public class InfoDto extends BaseDto {
     private final String messageText;
 
-    public InfoDto(OPERATION_TYPE operationType, String messageText) {
-        super(MESSAGE_TYPE.INFO, operationType);
+    public InfoDto(OperationType operationType, String messageText) {
+        super(MessageType.INFO, operationType);
         this.messageText = messageText;
     }
 
     public InfoDto() {
-        super(MESSAGE_TYPE.INFO, OPERATION_TYPE.NONE);
+        super(MessageType.INFO, OperationType.NONE);
         this.messageText = "";
     }
 
     public static InfoDto createLogonInfo(String nickName) {
-        return new InfoDto(OPERATION_TYPE.LOGON, nickName);
+        return new InfoDto(OperationType.LOGON, nickName);
     }
 
     public static InfoDto createLogoffInfo(String nickName) {
-        return new InfoDto(OPERATION_TYPE.LOGOFF, nickName);
+        return new InfoDto(OperationType.LOGOFF, nickName);
     }
 }

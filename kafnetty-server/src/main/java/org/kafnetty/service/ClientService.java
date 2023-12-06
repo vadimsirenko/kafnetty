@@ -1,13 +1,13 @@
 package org.kafnetty.service;
 
 import io.netty.channel.Channel;
-import org.kafnetty.dto.ClientDto;
+import org.kafnetty.dto.UserDto;
 
 import java.util.List;
 import java.util.UUID;
 
 public interface ClientService {
-    ClientDto getChannelUser(String channelLongId);
+    UserDto getChannelUser(String channelLongId);
 
     boolean existsChannelUser(String channelLongId);
 
@@ -15,11 +15,11 @@ public interface ClientService {
 
     void removeChannelUser(String channelLongId);
 
-    ClientDto processMessage(ClientDto message, Channel channel);
+    UserDto processMessage(UserDto message, Channel channel);
 
-    void setClientAsSent(ClientDto channelClientDto);
+    void setClientAsSent(UserDto channelUserDto);
 
-    List<ClientDto> getNotSyncClients();
+    List<UserDto> getNotSyncClients();
 }
 
 

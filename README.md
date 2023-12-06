@@ -35,7 +35,7 @@ WebBrowser -> WebSocket -> Kafka -> WebSocket -> WebBrowser
 
 - Сервера на Netty **KafnettyServer** которое принимает запрос на подключение (http://localhost:8181/chat.html) и
   открывающее канал для обмена с клиентом
-- Базы данных **Postgres** (**ChatDB**) с не связанными сущностями (таблицами): **message, client и room**, так как
+- Базы данных **Postgres** (**ChatDB**) с не связанными сущностями (таблицами): **message, user и room**, так как
   порядок получения из Kafka сущностей мы не можем контролировать.
 - Службы отправки в Kafka сообщений - **KafnettyProducer**
 - Службы приема сообщений их Kafka - **KafnettyConsumer**
@@ -51,7 +51,7 @@ WebBrowser -> WebSocket -> Kafka -> WebSocket -> WebBrowser
 - mapstruct - маппинги
 - flyway-core - миграция БД
 - tika-core - получение Mime-type по файлу в ресурсах для формирования ответов http (css, js,..)
-- kafka-clients - consumer/producer - взаимодействие с Kafka
+- kafka-users - consumer/producer - взаимодействие с Kafka
 
 ## План разработки
 

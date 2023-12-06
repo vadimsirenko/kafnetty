@@ -66,5 +66,4 @@ public class KafnettyConfig {
     public InetSocketAddress tcpPort() {
         return new InetSocketAddress(tcpPort);
     }
-
 }

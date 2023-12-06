@@ -5,13 +5,17 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.kafnetty.dto.*;
+import org.kafnetty.entity.User;
 import org.kafnetty.kafka.config.KafnettyConsumerConfig;
 import org.kafnetty.kafka.producer.KafnettyProducer;
+import org.kafnetty.netty.handler.auth.Session;
+import org.kafnetty.netty.handler.auth.UserContext;
 import org.kafnetty.repository.ChannelRepository;
-import org.kafnetty.type.OPERATION_TYPE;
+import org.kafnetty.type.OperationType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -28,39 +32,39 @@ public class ChatServiceImpl implements ChatService {
     @Autowired
     private KafnettyConsumerConfig kafnettyConsumerConfig;
 
-    private void putChannel(UUID roomId, Channel channel) {
-        ClientDto clientDto = clientService.getChannelUser(channel.id().asLongText());
-        UUID oldRoomId = (clientDto != null) ? clientDto.getRoomId() : null;
-        channelRepository.changeRoom(roomId, oldRoomId, channel
-                , oldGroup -> {
-                    assert clientDto != null;
-                    InfoDto.createLogoffInfo(clientDto.getNickName()).writeAndFlush(oldGroup);
-                }
-                , group -> {
-                    assert clientDto != null;
-                    InfoDto.createLogonInfo(clientDto.getNickName()).writeAndFlush(group);
-                    clientService.setRoomForChannelUser(roomId, channel.id().asLongText());
-                });
-    }
-
     @Override
     public void removeChannel(Channel channel) {
-        ClientDto clientDto = clientService.getChannelUser(channel.id().asLongText());
-        UUID roomIdOld = (clientDto != null) ? clientDto.getRoomId() : null;
-        assert clientDto != null;
-        channelRepository.removeChannelFromRoom(roomIdOld, channel,
-                oldGroup -> InfoDto.createLogoffInfo(clientDto.getNickName()).writeAndFlush(oldGroup));
-        clientService.removeChannelUser(channel.id().asLongText());
+        Session session = UserContext.getContext(channel);
+        if(session!=null) {
+            channelRepository.removeChannelFromRoom(session.getRoomId(), channel,
+                    oldGroup -> InfoDto.createLogoffInfo(session.getUser().getNickName()).writeAndFlush(oldGroup));
+            clientService.removeChannelUser(channel.id().asLongText());
+        }
     }
 
     @Override
-    public void processMessage(String jsonMessage, Channel channel) {
-        BaseDto messageDto = BaseDto.decode(jsonMessage);
+    public void putChannel(UUID roomId, Channel channel) {
+        Session session = UserContext.getContext(channel);
+        assert session != null;
+        UUID oldRoomId = session.getRoomId();
+        channelRepository.changeRoom(roomId, oldRoomId, channel
+                , oldGroup -> {
+                    InfoDto.createLogoffInfo(session.getUser().getNickName()).writeAndFlush(oldGroup);
+                }
+                , group -> {
+                    InfoDto.createLogonInfo(session.getUser().getNickName()).writeAndFlush(group);
+                    clientService.setRoomForChannelUser(roomId, channel.id().asLongText());
+                });
+        UserContext.setRoom(channel, roomId);
+    }
+
+    @Override
+    public void processMessage(BaseDto messageDto, Channel channel) {
         messageDto.setClusterId(kafnettyConsumerConfig.getGroupId());
         switch (messageDto.getMessageType()) {
             case MESSAGE -> {
-                MessageDto channelMessageDto = messageService.processMessage((MessageDto) messageDto);
-                channelRepository.sendToRoom(clientService.getChannelUser(channel.id().asLongText()).getRoomId(), channelMessageDto);
+                MessageDto channelMessageDto = messageService.processMessage(messageService.createMessage(messageDto, channel));
+                channelRepository.sendToRoom(channelMessageDto.getRoomId(), channelMessageDto);
                 kafnettyProducer.sendMessage(channelMessageDto,
                         dto -> messageService.setMessageAsSent((MessageDto) dto));
             }
@@ -75,15 +79,15 @@ public class ChatServiceImpl implements ChatService {
                 putChannel(channelMessageListDto.getRoomId(), channel);
                 channelMessageListDto.writeAndFlush(channel);
             }
-            case CLIENT -> {
-                ClientDto channelClientDto = clientService.processMessage((ClientDto) messageDto, channel);
-                putChannel(channelClientDto.getRoomId(), channel);
-                if (channelClientDto.getOperationType() == OPERATION_TYPE.UPDATE ||
-                        channelClientDto.getOperationType() == OPERATION_TYPE.CREATE) {
-                    kafnettyProducer.sendMessage(channelClientDto,
-                            dto -> clientService.setClientAsSent((ClientDto) dto));
+            case USER -> {
+                UserDto channelUserDto = clientService.processMessage((UserDto) messageDto, channel);
+                //putChannel(channelUserDto.getRoomId(), channel);
+                if (channelUserDto.getOperationType() == OperationType.UPDATE ||
+                        channelUserDto.getOperationType() == OperationType.CREATE) {
+                    kafnettyProducer.sendMessage(channelUserDto,
+                            dto -> clientService.setClientAsSent((UserDto) dto));
                 }
-                channelClientDto.writeAndFlush(channel);
+                channelUserDto.writeAndFlush(channel);
             }
             default -> {
             }
@@ -91,18 +95,9 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public boolean existsChannelUser(Channel channel) {
-        return clientService.existsChannelUser(channel.id().asLongText());
-    }
-
-    @Override
     public void InitChannel(Channel channel) {
-        ClientDto clientDto = clientService.getChannelUser(channel.id().asLongText());
-        if (clientDto.getId() == null) {
-            System.out.println(channel + " tourist");
-        } else {
-            roomService.getRoomList(clientDto.getId()).writeAndFlush(channel);
-            clientDto.writeAndFlush(channel);
+        if(UserContext.hasContext(channel)) {
+            roomService.getRoomList(UserContext.getContext(channel).getUser().getId()).writeAndFlush(channel);
         }
     }
 
@@ -111,7 +106,6 @@ public class ChatServiceImpl implements ChatService {
         BaseDto message = consumerRecord.value();
         log.info("receive value : {} ", message.toJson());
         if (message instanceof MessageDto) {
-
             if (!message.getClusterId().equals(kafnettyConsumerConfig.getGroupId())) {
                 MessageDto channelMessageDto = (MessageDto) message;
                 messageService.processMessage(channelMessageDto);
@@ -123,19 +117,19 @@ public class ChatServiceImpl implements ChatService {
                 roomService.processMessage(channelRoomDto);
                 channelRepository.sendToAllRoom(channelRoomDto);
             }
-        } else if (message instanceof ClientDto) {
+        } else if (message instanceof UserDto) {
             if (!message.getClusterId().equals(kafnettyConsumerConfig.getGroupId())) {
-                ClientDto channelClientDto = (ClientDto) message;
-                clientService.processMessage(channelClientDto, null);
+                UserDto channelUserDto = (UserDto) message;
+                clientService.processMessage(channelUserDto, null);
             }
         }
     }
 
     @EventListener(ApplicationReadyEvent.class)
     public void syncObjectCollections() {
-        for (ClientDto channelClientDto : clientService.getNotSyncClients()) {
-            kafnettyProducer.sendMessage(channelClientDto,
-                    dto -> clientService.setClientAsSent((ClientDto) dto));
+        for (UserDto channelUserDto : clientService.getNotSyncClients()) {
+            kafnettyProducer.sendMessage(channelUserDto,
+                    dto -> clientService.setClientAsSent((UserDto) dto));
         }
         for (RoomDto channelRoomDto : roomService.getNotSyncRooms()) {
             kafnettyProducer.sendMessage(channelRoomDto,
