@@ -1,0 +1,36 @@
+/**
+ * Projects
+ */
+dependencies {
+    implementation project(':kafnetty-data')
+    implementation project(':kafnetty-store')
+}
+/**
+ * Spring
+ */
+dependencies {
+    provided 'org.springframework.boot:spring-boot-starter-security'
+    provided 'org.springframework.boot:spring-boot-starter-data-jpa'
+    provided 'org.springframework.kafka:spring-kafka'
+}
+/**
+ * Netty
+ */
+dependencies {
+    provided 'io.netty:netty-all'
+}
+/**
+ * JsonWebtoken
+ */
+dependencies {
+    implementation "io.jsonwebtoken:jjwt-api:$jsonwebtoken"
+    implementation "io.jsonwebtoken:jjwt-impl:$jsonwebtoken"
+    implementation "io.jsonwebtoken:jjwt-jackson:$jsonwebtoken"
+}
+/**
+ * MapStruct
+ */
+dependencies {
+    provided "org.mapstruct:mapstruct:$mapstruct"
+    annotationProcessor "org.mapstruct:mapstruct-processor:$mapstruct"
+}

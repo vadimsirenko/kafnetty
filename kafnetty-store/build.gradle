@@ -1,0 +1,12 @@
+/**
+ * Projects
+ */
+dependencies {
+    implementation project(':kafnetty-data')
+}
+/**
+ * Spring
+ */
+dependencies {
+    provided 'org.springframework.boot:spring-boot-starter-data-jpa'
+}

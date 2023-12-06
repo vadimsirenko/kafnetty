@@ -1,13 +1,76 @@
 plugins {
-    id 'java'
+    id 'org.springframework.boot' version "${springframeworkBoot}"
+    id 'io.spring.dependency-management' version "${dependencyManagement}"
 }
 
-group = 'org.kafnetty'
-version = '1.0'
+/**
+ * General dependencies to all modules
+ */
+subprojects {
 
-repositories {
-    mavenCentral()
-}
-test {
-    useJUnitPlatform()
+    apply plugin: 'java'
+    apply plugin: 'java-library'
+    apply plugin: 'org.springframework.boot'
+    apply plugin: 'io.spring.dependency-management'
+
+    configurations {
+        provided
+    }
+
+    sourceSets {
+        main.compileClasspath += configurations.provided
+        test.compileClasspath += configurations.provided
+        test.runtimeClasspath += configurations.provided
+    }
+
+    group 'org.kafnetty'
+
+    version '1.0'
+
+    sourceCompatibility = JavaVersion.VERSION_19
+
+    jar {
+        enabled = true
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+
+    repositories {
+        mavenCentral()
+    }
+
+    /**
+     * Lombok
+     */
+    dependencies {
+        compileOnly 'org.projectlombok:lombok'
+        testCompileOnly 'org.projectlombok:lombok'
+        annotationProcessor 'org.projectlombok:lombok'
+        testAnnotationProcessor 'org.projectlombok:lombok'
+    }
+    /**
+     * Netty
+     */
+    dependencies {
+        implementation 'io.netty:netty-all'
+        implementation "org.mapstruct:mapstruct:$mapstruct"
+    }
+    /**
+     * Logging
+     */
+    dependencies {
+        implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.22.0'
+        implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: '2.22.0'
+    }
+
+    /**
+     * Test
+     */
+    dependencies {
+        testImplementation group: 'org.springframework.security', name: 'spring-security-test'
+        testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
+        testImplementation group: 'com.h2database', name: 'h2'
+    }
 }

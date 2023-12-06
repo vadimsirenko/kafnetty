@@ -4,7 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.kafnetty.dto.BaseDto;
-import org.kafnetty.service.ChatService;
+import org.kafnetty.service.chat.ChatService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
@@ -15,11 +16,13 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class KafnettyConsumer {
     private final ChatService chatService;
+    @Value("${spring.kafka.group-id}")
+    private String groupId;
 
     @KafkaListener(topics = {"#{autoCreateTopicConfig.getTopic().split(',')}"},
             groupId = "#{kafnettyConsumerConfig.getGroupId()}")
     public void onMessage(ConsumerRecord<UUID, BaseDto> consumerRecord) {
-        chatService.processBaseDtoFromKafka(consumerRecord);
+        chatService.processBaseDtoFromKafka(consumerRecord, groupId);
         log.info("Consumer Record: {}", consumerRecord);
     }
 

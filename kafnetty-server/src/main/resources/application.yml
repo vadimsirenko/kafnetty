@@ -1,8 +1,5 @@
 server:
   port: 8181
-  web-socket-path: "/websocket"
-  static-path: "/static"
-  chat-path: "/chat.html"
   boss:
     thread:
       count: 2

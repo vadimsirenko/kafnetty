@@ -1,0 +1,25 @@
+/**
+ * Projects
+ */
+dependencies {
+    implementation project(':kafnetty-data')
+    implementation project(':kafnetty-service')
+}
+/**
+ * Spring
+ */
+dependencies {
+    provided 'org.springframework.boot:spring-boot-starter-security'
+}
+/**
+ * Netty
+ */
+dependencies {
+    provided 'io.netty:netty-all'
+}
+/**
+ * Tika
+ */
+dependencies {
+    implementation "org.apache.tika:tika-core:$tika"
+}

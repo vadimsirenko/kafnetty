@@ -1,0 +1,8 @@
+/**
+ * Spring
+ */
+dependencies {
+    provided 'org.springframework.boot:spring-boot-starter-json'
+    provided 'org.springframework.boot:spring-boot-starter-security'
+    provided 'io.netty:netty-all'
+}

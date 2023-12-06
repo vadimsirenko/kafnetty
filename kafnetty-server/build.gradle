@@ -1,30 +1,33 @@
-plugins {
-    id 'java'
-    id 'io.spring.dependency-management' version "${dependencyManagement}"
-    id 'org.springframework.boot' version "${springframeworkBoot}"
+/**
+ * Projects
+ */
+dependencies {
+    implementation project(':kafnetty-data')
+    implementation project(':kafnetty-service')
+    implementation project(':kafnetty-store')
+    implementation project(':kafnetty-netty')
 }
-repositories {
-    mavenLocal()
-    mavenCentral()
+/**
+ * Spring
+ */
+dependencies {
+    provided 'org.springframework.boot:spring-boot-starter-data-jpa'
+    provided 'org.springframework.boot:spring-boot-starter-security'
+    provided 'org.springframework.kafka:spring-kafka'
+}
+/**
+ * Netty
+ */
+dependencies {
+    provided 'io.netty:netty-all'
 }
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'io.netty:netty-all'
-    implementation 'org.flywaydb:flyway-core'
-    implementation 'org.springframework.kafka:spring-kafka'
-    compileOnly 'org.projectlombok:lombok'
-    implementation "org.mapstruct:mapstruct:$mapstruct"
-    runtimeOnly 'org.postgresql:postgresql'
-    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
-    implementation "org.apache.tika:tika-core:$tika"
-
-    annotationProcessor 'org.projectlombok:lombok'
-    annotationProcessor "org.mapstruct:mapstruct-processor:$mapstruct"
-
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'io.projectreactor:reactor-test'
-    testImplementation 'org.springframework.kafka:spring-kafka-test'
+    provided 'org.flywaydb:flyway-core'
 }
-test {
-    useJUnitPlatform()
+dependencies {
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+}
+dependencies {
+    runtimeOnly 'org.postgresql:postgresql'
 }
