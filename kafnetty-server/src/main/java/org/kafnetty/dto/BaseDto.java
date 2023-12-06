@@ -23,6 +23,7 @@ import java.util.UUID;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
+        include =  JsonTypeInfo.As.EXISTING_PROPERTY,
         property = "messageType")
 @JsonSubTypes({
         @JsonSubTypes.Type(value = MessageDto.class, name = "MESSAGE"),
