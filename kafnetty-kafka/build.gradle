@@ -4,31 +4,15 @@
 dependencies {
     implementation project(':kafnetty-data')
     implementation project(':kafnetty-service')
-    implementation project(':kafnetty-store')
-    implementation project(':kafnetty-netty')
-    implementation project(':kafnetty-kafka')
 }
 /**
  * Spring
  */
 dependencies {
-    provided 'org.springframework.boot:spring-boot-starter-data-jpa'
     provided 'org.springframework.boot:spring-boot-starter-security'
     provided 'org.springframework.kafka:spring-kafka'
-}
-/**
- * Netty
- */
-dependencies {
-    provided 'io.netty:netty-all'
-}
-dependencies {
-    provided 'org.flywaydb:flyway-core'
 }
 dependencies {
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
-}
-dependencies {
-    runtimeOnly 'org.postgresql:postgresql'
 }
