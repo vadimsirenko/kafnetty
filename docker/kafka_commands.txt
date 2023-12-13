@@ -6,6 +6,6 @@ kafka-topics --bootstrap-server localhost:9092  --list
 
 kafka-topics --bootstrap-server localhost:9092 --describe --topic kinaction_helloworld
 
-kafka-console-producer.sh --bootstrap-server localhost:9092 --topic kinaction_helloworld
+kafka-console-producer --bootstrap-server localhost:9092 --topic kinaction_helloworld
 
-kafka-console-consumer --bootstrap-server localhost:9094 --topic kinaction_helloworld --from-beginning
+kafka-console-consumer --bootstrap-server localhost:9092 --topic kinaction_helloworld --from-beginning
