@@ -1,16 +1,13 @@
 package ka;
 
-import lombok.extern.log4j.Log4j2;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.util.List;
 import java.util.Properties;
-import java.util.logging.Logger;
 
 
 @Slf4j
