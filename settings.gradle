@@ -7,4 +7,5 @@ include 'kafnetty-service'
 include 'kafnetty-kafka'
 include 'kafka_action'
 include 'kafnetty-ws'
+include 'travel-chat'
 
